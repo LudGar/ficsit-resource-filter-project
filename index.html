@@ -1,70 +1,98 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Satisfactory Resource Nodes — p5.js</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- p5.js -->
-  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
-  <style>
-    :root {
-      --bg: #0b0f14;
-      --fg: #d8e1ea;
-      --muted: #7a8a99;
-      --panel: #121820;
-      --accent: #5ec2ff;
-    }
-    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Helvetica, Arial; }
-    #ui {
-      position: fixed; left: 12px; top: 12px; z-index: 10;
-      background: rgba(18,24,32,0.9); border: 1px solid #1e2a36; border-radius: 12px;
-      padding: 12px 14px; max-width: 360px; backdrop-filter: blur(6px);
-    }
-    #ui h1 { font-size: 16px; margin: 0 0 6px; font-weight: 700; }
-    #ui .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 6px 0; }
-    #ui .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
-    #legend {
-      position: fixed; right: 12px; top: 12px; z-index: 10;
-      background: rgba(18,24,32,0.9); border: 1px solid #1e2a36; border-radius: 12px;
-      padding: 10px 12px; max-width: 320px; max-height: 66vh; overflow: auto;
-    }
-    #legend h2 { font-size: 14px; margin: 0 0 6px; font-weight: 700;}
-    #legend .group { margin-bottom: 8px; }
-    #legend .item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 2px 0; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); }
-    .purity { font-size: 11px; color: var(--muted); }
-    .badge { padding: 2px 6px; border-radius: 999px; background: #0f2535; border: 1px solid #17465f; color: #9bd7ff; font-size: 11px;}
-    #toast {
-      position: fixed; left: 50%; transform: translateX(-50%);
-      bottom: 14px; background: #0f1620; border: 1px solid #1d2a38; color: #c8d6e5;
-      padding: 8px 12px; border-radius: 10px; font-size: 13px; opacity: 0; transition: opacity .25s ease;
-    }
-    #toast.show { opacity: 1; }
-    a { color: var(--accent); text-decoration: none; }
-    input[type="file"] { color: var(--fg); }
-    label { font-size: 12px; color: var(--muted); }
-    #filters { display: grid; grid-template-columns: repeat(2, minmax(120px,1fr)); gap: 4px 12px; margin-top: 6px; }
-    #filters label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
-    #purityFilters { display: flex; gap: 12px; margin-top: 6px; }
-  </style>
+<meta charset="utf-8" />
+<title>Satisfactory Resource Nodes — Static Dataset (Blueprint)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="data:," />
+<!-- p5.js -->
+<script src="https://cdn.jsdelivr.net/npm/p5@1.9.4/lib/p5.min.js"></script>
+<style>
+  /* ===== Blueprint UI Theme ===== */
+  :root{
+    --bg:#0a1020;           /* deep blueprint navy */
+    --panel:#0f1b38;
+    --panel-border:#19345f;
+    --ink:#e8f1ff;          /* near-white ink */
+    --muted:#9ab5d6;
+    --accent:#69c8ff;       /* cyan blueprint lines */
+  }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  body{
+    background:
+      radial-gradient(circle at 20% 15%, rgba(58,167,255,0.06), transparent 42%),
+      radial-gradient(circle at 80% 70%, rgba(105,200,255,0.05), transparent 45%),
+      linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.04)),
+      var(--bg);
+  }
+
+  /* Panels */
+  #ui,#legend,#toast{
+    position:fixed; z-index:10; background:rgba(15,27,56,.92);
+    border:1px solid var(--panel-border); border-radius:14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.25), inset 0 0 0 1px rgba(105,200,255,.06);
+    backdrop-filter: blur(6px);
+  }
+  #ui{left:12px; top:12px; padding:14px 16px; max-width:560px}
+  #legend{right:12px; top:12px; padding:10px 12px; max-width:320px; max-height:68vh; overflow:auto}
+  #toast{left:50%; transform:translateX(-50%); bottom:14px; color:#cfe9ff; padding:8px 12px; font-size:13px; opacity:0; transition:opacity .25s}
+  #toast.show{opacity:1}
+
+  h1{font-size:16px; margin:0 0 8px; font-weight:800; letter-spacing:.3px}
+  #legend h2{font-size:14px; margin:0 0 6px; font-weight:700}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:8px 0}
+  .hint{color:var(--muted); font-size:12px; margin-top:6px}
+
+  .badge,.pill{
+    padding:2px 8px; border-radius:999px; border:1px solid #1e3e73;
+    background:#0b1733; color:#a6d9ff; font-size:11px
+  }
+  .pill{background:#0c2246; color:#89d4ff; border-color:#1b4b85}
+
+  #filters{display:grid; grid-template-columns:repeat(2,minmax(180px,1fr)); gap:6px 14px; margin-top:6px}
+  #filters label{display:flex; gap:8px; align-items:center; cursor:pointer; font-size:12px}
+  #purityFilters{display:flex; gap:16px; margin-top:6px}
+
+  .item{display:flex; align-items:center; gap:8px; font-size:12px; margin:2px 0}
+  .dot{width:12px; height:12px; border-radius:50%; border:1px solid rgba(255,255,255,.15)}
+
+  button{
+    cursor:pointer; border-radius:10px; padding:6px 10px; border:1px solid #1e3e73;
+    background:linear-gradient(180deg,#0e2246,#0a1a36);
+    color:#cfe9ff; font-weight:600; letter-spacing:.2px
+  }
+  button:hover{border-color:#2a66b0; box-shadow:0 0 0 2px rgba(105,200,255,.15) inset}
+  input[type="file"]{accent-color:var(--accent);}
+  a{color:var(--accent); text-decoration:none}
+
+  #tooltip{
+    position:fixed; z-index:20; background:#0b1733; border:1px solid #1f3a6b; border-radius:10px;
+    padding:8px 10px; pointer-events:none; font-size:12px; display:none; max-width:360px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.35), inset 0 0 0 1px rgba(105,200,255,.06);
+  }
+</style>
 </head>
 <body>
   <div id="ui">
-    <h1>Resource Nodes — p5</h1>
+    <h1>Resource Nodes — Static Dataset</h1>
     <div class="row">
-      <input id="file" type="file" accept=".sav" />
+      <input id="file" type="file" accept=".json,.csv" />
       <span class="badge" id="count">0 nodes</span>
+      <span class="pill">Wheel=zoom • Drag=pan</span>
     </div>
     <div class="row">
       <button id="fit">Fit to view</button>
       <label><input type="checkbox" id="labels"> show labels</label>
+      <button id="exportCsv">Export CSV</button>
+      <button id="exportGeo">Export GeoJSON</button>
+      <button id="exportClean">Export cleaned nodes.json</button>
     </div>
     <div class="row">
-      <strong>Filter types</strong>
+      <strong>Type filters</strong>
       <div id="filters"></div>
     </div>
     <div class="row">
-      <strong>Filter purity</strong>
+      <strong>Purity</strong>
       <div id="purityFilters">
         <label><input type="checkbox" data-purity="Impure" checked> Impure</label>
         <label><input type="checkbox" data-purity="Normal" checked> Normal</label>
@@ -72,345 +100,24 @@
       </div>
     </div>
     <div class="hint">
-      Load a <code>.sav</code> (U8 → 1.1). Mouse wheel zoom, drag to pan.
+      Load either:<br>
+      • <code>nodes.json</code> (array of <code>{ type, purity, x, y, z }</code>)<br>
+      • <code>nodes.csv</code> (header: <code>type,purity,x,y,z</code>)<br>
+      • <code>en-Stable.json</code> from SC-InteractiveMap (we auto-extract).
     </div>
   </div>
 
   <div id="legend">
     <h2>Legend</h2>
+    <div class="item"><span class="dot" style="background:#204a79"></span><span style="color:#8cbff0">Blueprint dotted grid (majors fixed; minors scale by zoom)</span></div>
+    <div class="item"><span class="dot" style="background:#ff9f9f"></span><span style="color:#8cbff0">Triangles = Geysers • Diamonds = Fluids • Circles = Solids</span></div>
     <div id="legendContent"></div>
   </div>
 
+  <div id="tooltip"></div>
   <div id="toast"></div>
 
-  <script type="module">
-    import { Parser } from "https://cdn.jsdelivr.net/npm/@etothepii/satisfactory-file-parser/+esm";
-
-    // ---------- Palette ----------
-    const TYPE_COLORS = {
-      // solids
-      "Iron Ore": "#8aa0b2",
-      "Copper Ore": "#f2a65a",
-      "Limestone": "#c9d1a0",
-      "Coal": "#282828",
-      "Caterium Ore": "#e6d957",
-      "Raw Quartz": "#e9b0ff",
-      "Bauxite": "#b45a30",
-      "Sulfur": "#f0ea38",
-      "Uranium": "#75ff57",
-      "S.A.M.": "#54e1ff",
-      // fluids / special
-      "Crude Oil": "#7a4bff",
-      "Water": "#4ea3ff",
-      "Nitrogen Gas": "#88c7ff",
-      "Geyser": "#ff9f9f",
-      "Unknown": "#bbbbbb"
-    };
-    const PURITY_MULT = { Impure: 0.7, Normal: 1.0, Pure: 1.35 };
-
-    // ---------- State ----------
-    let nodes = [];      // {x,y,z,type,purity,name}
-    let bbox = null;     // {minX,maxX,minY,maxY}
-    let cam = { cx: 0, cy: 0, scale: 0.0015 }; // simple camera
-
-    // ---------- Helpers ----------
-    const toast = (msg, ms=2200) => {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(()=>t.classList.remove('show'), ms);
-    };
-
-    const brighten = (hex, factor) => {
-      const c = hex.replace('#','');
-      const r = parseInt(c.slice(0,2),16);
-      const g = parseInt(c.slice(2,4),16);
-      const b = parseInt(c.slice(4,6),16);
-      const adj = v => Math.max(0, Math.min(255, Math.round(v*factor)));
-      const out = (adj(r)<<16) | (adj(g)<<8) | adj(b);
-      return `#${out.toString(16).padStart(6,'0')}`;
-    };
-
-    const purityFromEnum = (enumVal) => {
-      if (!enumVal) return "Normal";
-      if (enumVal.includes("RP_Pure")) return "Pure";
-      if (enumVal.includes("RP_Inpure") || enumVal.includes("RP_Impure")) return "Impure";
-      return "Normal";
-    };
-
-    // Extract a property by name from a Save Entity/Component property bag
-    const getProp = (props, name) => {
-      if (!props) return undefined;
-      // parser returns arrays like [{name,type,value:...}, ...]
-      return props.find(p => p && (p.name === name || p.Name === name));
-    };
-
-    const resourceDescriptorToFriendly = (pathOrClass) => {
-      // Examples: "/Game/.../Iron/Desc_OreIron.Desc_OreIron_C" or "Desc_OreIron_C"
-      const s = (pathOrClass || "").split('/').pop();
-      const base = s.replace(/^Desc_/,'').replace(/\..*$/,'').replace(/_C$/,'');
-      switch (base) {
-        case 'OreIron': return 'Iron Ore';
-        case 'OreCopper': return 'Copper Ore';
-        case 'Stone': return 'Limestone';
-        case 'Coal': return 'Coal';
-        case 'OreCaterium': return 'Caterium Ore';
-        case 'RawQuartz': return 'Raw Quartz';
-        case 'Bauxite': return 'Bauxite';
-        case 'Sulfur': return 'Sulfur';
-        case 'Uranium': return 'Uranium';
-        case 'SAM': case 'S.A.M.': case 'SAMore': return 'S.A.M.';
-        case 'CrudeOil': case 'LiquidFuel': return 'Crude Oil';
-        case 'Water': return 'Water';
-        case 'NitrogenGas': case 'Nitrogen': return 'Nitrogen Gas';
-        default: return 'Unknown';
-      }
-    };
-
-    // Heuristic: identify resource node classes by className
-    const looksLikeResourceNode = (className) => {
-      const s = className || "";
-      return s.includes("ResourceNode") || s.includes("BP_ResourceNode") || s.includes("BP_Geyser") || s.includes("Fracking") || s.includes("Geyser");
-    };
-
-    // ---------- UI Build ----------
-    const allTypeKeys = Object.keys(TYPE_COLORS);
-    const activeTypes = new Set(allTypeKeys);
-    const activePurities = new Set(["Impure","Normal","Pure"]);
-
-    const filtersDiv = document.getElementById('filters');
-    for (const k of allTypeKeys) {
-      const id = `type-${k.replace(/\W+/g,'_')}`;
-      const label = document.createElement('label');
-      label.innerHTML = `<input type="checkbox" id="${id}" checked> ${k}`;
-      filtersDiv.appendChild(label);
-      label.querySelector('input').addEventListener('change', (e)=>{
-        if (e.target.checked) activeTypes.add(k); else activeTypes.delete(k);
-        redrawLegend();
-        window.redraw && window.redraw();
-      });
-    }
-    document.querySelectorAll('#purityFilters input[type="checkbox"]').forEach(cb=>{
-      cb.addEventListener('change', (e)=>{
-        const p = e.target.dataset.purity;
-        if (e.target.checked) activePurities.add(p); else activePurities.delete(p);
-        window.redraw && window.redraw();
-      });
-    });
-
-    const redrawLegend = () => {
-      const host = document.getElementById('legendContent');
-      host.innerHTML = '';
-      const purityRow = document.createElement('div');
-      purityRow.className = 'group';
-      purityRow.innerHTML = `
-        <div class="item"><span class="purity">Purity shading: Impure darker → Pure brighter</span></div>
-      `;
-      host.appendChild(purityRow);
-
-      for (const k of allTypeKeys) {
-        const base = TYPE_COLORS[k];
-        const row = document.createElement('div'); row.className = 'item';
-        const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = base;
-        row.appendChild(dot);
-        const label = document.createElement('span'); label.textContent = k;
-        row.appendChild(label);
-        host.appendChild(row);
-      }
-    };
-    redrawLegend();
-
-    // ---------- File handling ----------
-    document.getElementById('file').addEventListener('change', async (e)=>{
-      const f = e.target.files?.[0];
-      if (!f) return;
-      toast('Parsing save… This can take a moment for big files.');
-      const buf = await f.arrayBuffer();
-      const save = Parser.ParseSave(f.name.replace(/\.sav$/i,''), buf, {
-        onProgressCallback: (p, msg)=>{ /* could show progress if desired */ }
-      });
-      nodes = extractResourceNodes(save);
-      bbox = computeBBox(nodes);
-      fitToView();
-      document.getElementById('count').textContent = `${nodes.length} nodes`;
-      toast(`Loaded ${nodes.length} nodes`);
-      window.redraw && window.redraw();
-    });
-
-    document.getElementById('fit').addEventListener('click', ()=>{
-      fitToView();
-      window.redraw && window.redraw();
-    });
-
-    // ---------- Extraction ----------
-    function extractResourceNodes(save) {
-      const out = [];
-      if (!save || !save.levels) return out;
-
-      for (const level of Object.values(save.levels)) {
-        const objs = level?.objects || [];
-        for (const obj of objs) {
-          if (!obj || obj.type !== 'Entity') continue;
-          const className = obj?.className || obj?.ClassName || '';
-          if (!looksLikeResourceNode(className)) continue;
-
-          // Position (UE: X/Y plane; Z up). Parser typically exposes "transform.translation"
-          const tr = obj?.transform || obj?.Transform || {};
-          const t = tr.translation || tr.Translation || tr.position || tr.Position || {};
-          const x = t.x ?? t.X ?? 0;
-          const y = t.y ?? t.Y ?? 0;
-          const z = t.z ?? t.Z ?? 0;
-
-          // Properties bag (array of {name,type,...})
-          const props = obj?.properties || obj?.Properties || [];
-
-          // Resource type (descriptor)
-          const pResClass = getProp(props, 'mResourceClass') || getProp(props, 'mResource') || getProp(props, 'mResourceNodeType');
-          let descriptor = null;
-          if (pResClass?.value?.pathName) descriptor = pResClass.value.pathName;
-          else if (typeof pResClass?.value === 'string') descriptor = pResClass.value;
-          else if (pResClass?.PathName) descriptor = pResClass.PathName;
-          const typeName = resourceDescriptorToFriendly(descriptor);
-
-          // Purity enum
-          const pPurity = getProp(props, 'mPurity') || getProp(props, 'mNodePurity') || getProp(props, 'mResourcePurity');
-          let purity = 'Normal';
-          if (pPurity?.value) {
-            const enumString = typeof pPurity.value === 'string' ? pPurity.value : (pPurity.value?.enum || pPurity.value?.Enum || '');
-            purity = purityFromEnum(enumString || pPurity.value);
-          }
-
-          // Geyser handling (they’re also “nodes” but special)
-          const isGeyser = /Geyser/i.test(className) || /Geyser/i.test(typeName);
-          const finalType = isGeyser ? 'Geyser' : typeName;
-
-          // Only keep recognized types to start with (Unknowns still drawn gray)
-          out.push({ x, y, z, type: finalType, purity, className });
-        }
-      }
-      return out;
-    }
-
-    function computeBBox(list) {
-      if (!list.length) return null;
-      let minX=Infinity, maxX=-Infinity, minY=Infinity, maxY=-Infinity;
-      for (const n of list) {
-        if (n.x < minX) minX = n.x;
-        if (n.x > maxX) maxX = n.x;
-        if (n.y < minY) minY = n.y;
-        if (n.y > maxY) maxY = n.y;
-      }
-      return { minX, maxX, minY, maxY };
-    }
-
-    function fitToView() {
-      if (!bbox) return;
-      const w = window.innerWidth, h = window.innerHeight;
-      const margin = 60;
-      const sx = (w - margin*2) / Math.max(1, bbox.maxX - bbox.minX);
-      const sy = (h - margin*2) / Math.max(1, bbox.maxY - bbox.minY);
-      cam.scale = Math.min(sx, sy);
-      cam.cx = (bbox.minX + bbox.maxX) / 2;
-      cam.cy = (bbox.minY + bbox.maxY) / 2;
-      toast('Camera reset to fit');
-    }
-
-    // ---------- p5 sketch ----------
-    let dragging = false, dragStart = null, camStart = null;
-
-    window.setup = function() {
-      createCanvas(window.innerWidth, window.innerHeight);
-      noLoop();
-      // Mouse wheel zoom
-      window.addEventListener('wheel', (e)=>{
-        const delta = Math.sign(e.deltaY);
-        const factor = (delta > 0) ? 0.9 : 1.1;
-        cam.scale *= factor;
-        // Optional: zoom towards cursor
-        redraw();
-      }, { passive: true });
-      // Drag to pan
-      window.addEventListener('pointerdown', (e)=>{
-        dragging = true; dragStart = {x: e.clientX, y: e.clientY}; camStart = {...cam};
-      });
-      window.addEventListener('pointermove', (e)=>{
-        if (!dragging) return;
-        const dx = (e.clientX - dragStart.x) / cam.scale;
-        const dy = (e.clientY - dragStart.y) / cam.scale;
-        cam.cx = camStart.cx - dx;
-        cam.cy = camStart.cy - dy;
-        redraw();
-      });
-      window.addEventListener('pointerup', ()=> dragging = false);
-      document.getElementById('labels').addEventListener('change', ()=> redraw());
-    };
-
-    window.draw = function() {
-      background(11,15,20);
-      // grid
-      drawGrid();
-
-      if (!nodes.length) return;
-
-      // transform: world (UE) → screen
-      translate(width/2, height/2);
-      scale(cam.scale, cam.scale);
-      translate(-cam.cx, -cam.cy);
-
-      // draw nodes
-      const showLabels = document.getElementById('labels').checked;
-      noStroke();
-      textSize(12 / cam.scale);
-      for (const n of nodes) {
-        if (!activeTypes.has(n.type)) continue;
-        if (!activePurities.has(n.purity)) continue;
-
-        const base = TYPE_COLORS[n.type] || TYPE_COLORS['Unknown'];
-        const col = brighten(base, PURITY_MULT[n.purity] || 1.0);
-        fill(col);
-
-        const size = 8 / Math.sqrt(cam.scale); // keep visually similar size
-        circle(n.x, n.y, size);
-
-        if (showLabels && cam.scale > 0.002) {
-          fill(220,230,240, 230);
-          text(`${n.type} (${n.purity})`, n.x + 6/ cam.scale, n.y - 6/ cam.scale);
-        }
-      }
-    };
-
-    function drawGrid() {
-      push();
-      // light grid in screen space for orientation
-      stroke(40,52,66);
-      strokeWeight(1);
-      // coarse world grid: sample every ~10000 units (scaled)
-      const step = 10000;
-      if (bbox) {
-        const minX = Math.floor(bbox.minX / step) * step;
-        const maxX = Math.ceil(bbox.maxX / step) * step;
-        const minY = Math.floor(bbox.minY / step) * step;
-        const maxY = Math.ceil(bbox.maxY / step) * step;
-
-        // apply camera transform to grid draw
-        translate(width/2, height/2);
-        scale(cam.scale, cam.scale);
-        translate(-cam.cx, -cam.cy);
-
-        for (let x=minX; x<=maxX; x+=step) {
-          line(x, minY, x, maxY);
-        }
-        for (let y=minY; y<=maxY; y+=step) {
-          line(minX, y, maxX, y);
-        }
-      }
-      pop();
-    }
-
-    window.windowResized = function() {
-      resizeCanvas(window.innerWidth, window.innerHeight);
-      redraw();
-    };
-  </script>
+  <!-- App logic -->
+  <script type="module" src="app.js"></script>
 </body>
 </html>

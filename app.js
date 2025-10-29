@@ -98,6 +98,38 @@ function normalizePurity(p) {
   if (s.includes("pure") && !s.includes("im")) return "Pure";
   return "Normal";
 }
+
+// --- auto-load nodes.json from same folder if present ---
+async function autoLoadNodes(){
+  try {
+    const res = await fetch("nodes.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("no nodes.json");
+    const text = await res.text();
+    const obj = JSON.parse(text);
+    let list = [];
+    if (Array.isArray(obj)) list = obj;
+    else list = parseSCIMJson(obj) || [];
+
+    if (!list.length) throw new Error("nodes.json contained no valid entries");
+
+    nodes = list.map(n=>({
+      type: n.type || "Unknown",
+      purity: normalizePurity(n.purity),
+      x:+n.x, y:+n.y, z:+(n.z??0)
+    }));
+    bbox = computeBBox(nodes);
+    rebuildUIFromData(nodes);
+    $("#count").textContent = `${nodes.length} nodes`;
+    fitToView(); askRedraw();
+    showToast(`Auto-loaded ${nodes.length} nodes from nodes.json`);
+  } catch(err){
+    console.log("Auto-load skipped:", err.message);
+  }
+}
+
+// Call it right after setup variables
+window.addEventListener("DOMContentLoaded", ()=>{ autoLoadNodes(); });
+
 function parseSCIMJson(obj){
   const out = [];
   if (!obj || !Array.isArray(obj.options)) return out;

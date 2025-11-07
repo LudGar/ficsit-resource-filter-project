@@ -168,8 +168,7 @@ window.draw = function () {
         line(p1.x, p1.y, p2.x, p2.y);
       }
     }
-  }
-
+  
   // HUD
   noStroke();
   fill(255);
@@ -180,6 +179,7 @@ window.draw = function () {
     `Min: ${MIN_DIST_M}m  Max: ${MAX_DIST_M}m  Step: ${BRANCH_LEN_M}m  Seeds: ${SEED_COUNT}`,
     10, 10
   );
+};
 
 // Camera interaction (world-space rendering → no reproject())
 let dragging = false;

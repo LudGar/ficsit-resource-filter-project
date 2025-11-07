@@ -36,42 +36,68 @@ window.buildFilterUI=function(){
 window.bindUI = function () {
   const $ = id => document.getElementById(id);
 
-  // Growth inputs (meters)
-  const minDistM   = $('minDistM');
-  const maxDistM   = $('maxDistM');
-  const branchLenM = $('branchLenM');
-
-  if (minDistM)   minDistM.oninput   = () => { MIN_DIST_M   = Math.max(0, +minDistM.value);   };
-  if (maxDistM)   maxDistM.oninput   = () => { MAX_DIST_M   = Math.max(0, +maxDistM.value);   };
-  if (branchLenM) branchLenM.oninput = () => { BRANCH_LEN_M = Math.max(0, +branchLenM.value); };
-
-  // Seeds: count + radius in meters
-  const seedCount  = $('seedCount');
-  const seedRadiusM = $('seedRadiusM');
-
-  if (seedCount) seedCount.oninput = () => {
-    SEED_COUNT = Math.max(1, Math.floor(+seedCount.value || 1));
-    rebuildForestFromProjected();
+  // Helper: parse numbers safely
+  const num = v => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : 0;
   };
 
-  if (seedRadiusM) seedRadiusM.oninput = () => {
-    SEED_RADIUS_M = Math.max(0, +seedRadiusM.value || 0);
-    SEED_RADIUS_WORLD = SEED_RADIUS_M * WORLD_UNITS_PER_METER;
-    rebuildForestFromProjected();
-  };
+  // Rebuild if not running; otherwise changes take effect next growth step
+  function maybeRebuild() {
+    if (!simulationRunning) rebuildForestFromProjected();
+  }
 
-  // Filters UI (already created by buildFilterUI)
-  const typesAllBtn  = $('typesAllBtn');
-  const typesNoneBtn = $('typesNoneBtn');
+  // --- Growth inputs (meters) ---
+  const minDistM    = $('minDistM');
+  const maxDistM    = $('maxDistM');
+  const branchLenM  = $('branchLenM');
+
+  function bindMeterInput(el, setter) {
+    if (!el) return;
+    const apply = () => { setter(num(el.value)); maybeRebuild(); };
+    el.addEventListener('input',  apply);  // fires on each keystroke/spinner
+    el.addEventListener('change', apply);  // fires on blur/Enter
+  }
+
+  bindMeterInput(minDistM,   v => { MIN_DIST_M   = Math.max(0, v); });
+  bindMeterInput(maxDistM,   v => { MAX_DIST_M   = Math.max(0, v); });
+  bindMeterInput(branchLenM, v => { BRANCH_LEN_M = Math.max(0, v); });
+
+  // --- Seeds: count + radius (meters) ---
+  const seedCount    = $('seedCount');
+  const seedRadiusM  = $('seedRadiusM');
+
+  if (seedCount) {
+    const apply = () => {
+      SEED_COUNT = Math.max(1, Math.floor(num(seedCount.value) || 1));
+      rebuildForestFromProjected(); // seed layout changes -> rebuild always
+    };
+    seedCount.addEventListener('input', apply);
+    seedCount.addEventListener('change', apply);
+  }
+
+  if (seedRadiusM) {
+    const apply = () => {
+      SEED_RADIUS_M = Math.max(0, num(seedRadiusM.value) || 0);
+      SEED_RADIUS_WORLD = SEED_RADIUS_M * WORLD_UNITS_PER_METER;
+      rebuildForestFromProjected();
+    };
+    seedRadiusM.addEventListener('input', apply);
+    seedRadiusM.addEventListener('change', apply);
+  }
+
+  // --- Filter bulk actions ---
+  const typesAllBtn   = $('typesAllBtn');
+  const typesNoneBtn  = $('typesNoneBtn');
   const purityAllBtn  = $('purityAllBtn');
   const purityNoneBtn = $('purityNoneBtn');
 
-  if (typesAllBtn)  typesAllBtn.onclick  = () => { selectedTypes = new Set(availableTypes);  buildFilterUI(); applyFilters(); };
-  if (typesNoneBtn) typesNoneBtn.onclick = () => { selectedTypes = new Set();                buildFilterUI(); applyFilters(); };
+  if (typesAllBtn)  typesAllBtn.onclick   = () => { selectedTypes = new Set(availableTypes);       buildFilterUI(); applyFilters(); };
+  if (typesNoneBtn) typesNoneBtn.onclick  = () => { selectedTypes = new Set();                     buildFilterUI(); applyFilters(); };
   if (purityAllBtn) purityAllBtn.onclick  = () => { selectedPurities = new Set(availablePurities); buildFilterUI(); applyFilters(); };
-  if (purityNoneBtn)purityNoneBtn.onclick = () => { selectedPurities = new Set();                 buildFilterUI(); applyFilters(); };
+  if (purityNoneBtn)purityNoneBtn.onclick = () => { selectedPurities = new Set();                  buildFilterUI(); applyFilters(); };
 
-  // Start / Reset
+  // --- Start / Reset ---
   const startBtn = $('startBtn');
   const resetBtn = $('resetBtn');
 
@@ -91,10 +117,11 @@ window.bindUI = function () {
     simulationRunning = false;
     if (startBtn) startBtn.innerText = 'Start Growth';
     autoFitCamera(false);
+    // Rebuild with *current* UI values (meters already copied to globals):
     rebuildForestFromProjected();
   };
 
-  // Make UI draggable
+  // --- Draggable panel ---
   const ui = document.getElementById('ui');
   const title = document.getElementById('uiTitle');
   let dragging = false, offset = { x: 0, y: 0 };
@@ -111,4 +138,5 @@ window.bindUI = function () {
   }
 
   console.log('[UI] Bound successfully');
+};
 };

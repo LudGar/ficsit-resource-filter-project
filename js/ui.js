@@ -139,4 +139,3 @@ window.bindUI = function () {
 
   console.log('[UI] Bound successfully');
 };
-};

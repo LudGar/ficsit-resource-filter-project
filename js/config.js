@@ -32,6 +32,7 @@ window.SEED_RADIUS_WORLD = SEED_RADIUS_M * WORLD_UNITS_PER_METER;
 window.simulationRunning = false;
 window.leaves  = [];
 window.trees   = [];
+window.seedsWorld = [];
 
 // Data / filters
 window.allMarkers = [];

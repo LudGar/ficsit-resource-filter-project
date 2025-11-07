@@ -180,7 +180,6 @@ window.draw = function () {
     `Min: ${MIN_DIST_M}m  Max: ${MAX_DIST_M}m  Step: ${BRANCH_LEN_M}m  Seeds: ${SEED_COUNT}`,
     10, 10
   );
-};
 
 // Camera interaction (world-space rendering → no reproject())
 let dragging = false;

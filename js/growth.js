@@ -1,7 +1,7 @@
 // ---- Helpers to convert meters ↔ world units ----
 function mToWorld(m) { return m * WORLD_UNITS_PER_METER; }
 
-// ---- Seeds: SEED_COUNT around world center, every 360/SEED_COUNT degrees (world coords) ----
+// ---- Seeds: SEED_COUNT around world center, evenly spaced (world coords) ----
 function getCurrentSeedWorlds() {
   const { W, E, N, S } = WORLD;
   const cx = (W + E) / 2, cy = (N + S) / 2;
@@ -15,19 +15,42 @@ function getCurrentSeedWorlds() {
   return seeds;
 }
 
+// ---- Assign each leaf to nearest seed (ownerId) ----
+function assignLeafOwnership(leavesArr, seedsArr) {
+  for (const leaf of leavesArr) {
+    let best = Infinity, owner = -1;
+    for (let i = 0; i < seedsArr.length; i++) {
+      const s = seedsArr[i];
+      const d = p5.Vector.dist(leaf.pos, createVector(s.x, s.y));
+      if (d < best) { best = d; owner = i; }
+    }
+    leaf.ownerId = owner;
+  }
+}
+
 // ---- Rebuild forest from current nodePoints (WORLD) & seeds (WORLD) ----
 window.rebuildForestFromProjected = function () {
   trees = [];
   leaves = [];
 
+  // Build leaves in WORLD
   for (let i = 0; i < nodePoints.length; i++) {
     const m = nodePoints[i];
     const meta = filteredMarkers[i] || { type: "unknown", purity: "unknown" };
     leaves.push(new Leaf(m.x, m.y, meta.type, meta.purity));
   }
 
-  const seeds = getCurrentSeedWorlds();
-  for (const s of seeds) trees.push(new Tree(createVector(s.x, s.y)));
+  // Seeds in WORLD
+  seedsWorld = getCurrentSeedWorlds();
+
+  // Partition leaves by nearest seed (ownerId)
+  if (leaves.length && seedsWorld.length) assignLeafOwnership(leaves, seedsWorld);
+
+  // Build one tree per seed, passing its treeId
+  for (let i = 0; i < seedsWorld.length; i++) {
+    const s = seedsWorld[i];
+    trees.push(new Tree(i, createVector(s.x, s.y)));
+  }
 };
 
 // ---- Snap a WORLD vector to the nearest 45° (world axes) ----
@@ -46,6 +69,7 @@ window.Leaf = class {
     this.type = type;
     this.purity = purity;
     this.reached = false;
+    this.ownerId = -1;            // set by assignLeafOwnership
   }
 };
 
@@ -72,16 +96,18 @@ window.Branch = class {
   }
 };
 
-// ---- Tree (WORLD) using world distances/steps in meters ----
+// ---- Tree (WORLD) that only considers its OWN leaves ----
 window.Tree = class {
-  constructor(rootWorld) {
+  constructor(treeId, rootWorld) {
+    this.id = treeId;            // owner id
     this.branches = [];
 
-    // Initial direction toward nearest leaf (WORLD)
+    // Initial direction toward nearest OWN leaf (WORLD)
     let dirW = createVector(0, -1);
-    if (leaves.length > 0) {
+    const ownLeaves = leaves.filter(l => !l.reached && l.ownerId === this.id);
+    if (ownLeaves.length > 0) {
       let nearest = null, best = Infinity;
-      for (const l of leaves) {
+      for (const l of ownLeaves) {
         const d = p5.Vector.dist(l.pos, rootWorld);
         if (d < best) { best = d; nearest = l.pos; }
       }
@@ -91,7 +117,7 @@ window.Tree = class {
       }
     }
 
-    // Build an initial trunk until within MAX_DIST_M (world) of some leaf
+    // Build initial trunk until within MAX_DIST_M (WORLD) of some OWN leaf
     const MAX_W = mToWorld(MAX_DIST_M);
     const STEP_W = mToWorld(BRANCH_LEN_M);
 
@@ -99,8 +125,8 @@ window.Tree = class {
     this.branches.push(current);
 
     let found = false, safety = 0;
-    while (!found && safety < 500) {
-      for (const leaf of leaves) {
+    while (!found && safety < 500 && ownLeaves.length > 0) {
+      for (const leaf of ownLeaves) {
         const d = p5.Vector.dist(leaf.pos, current.pos);
         if (d <= MAX_W) { found = true; break; }
       }
@@ -118,8 +144,10 @@ window.Tree = class {
     const MAX_W = mToWorld(MAX_DIST_M);
     const STEP_W = mToWorld(BRANCH_LEN_M);
 
-    // For each leaf, find closest branch within range (WORLD)
-    for (const l of leaves) {
+    // Only consider OWN leaves
+    const ownLeaves = leaves.filter(l => !l.reached && l.ownerId === this.id);
+
+    for (const l of ownLeaves) {
       let closest = null, record = Infinity;
       for (const b of this.branches) {
         const d = p5.Vector.dist(l.pos, b.pos);
@@ -133,7 +161,7 @@ window.Tree = class {
       }
     }
 
-    // Grow new branches with 45° snapping (WORLD), step = BRANCH_LEN_M (WORLD)
+    // Grow new branches with 45° snapping (WORLD)
     const newBranches = [];
     for (const b of this.branches) {
       if (b.count > 0) {
@@ -148,7 +176,7 @@ window.Tree = class {
   }
 };
 
-// ---- Run one growth tick; remove reached leaves ----
+// ---- One growth tick; remove reached leaves ----
 window.runGrowthStep = function () {
   for (const t of trees) t.grow();
   leaves = leaves.filter(l => !l.reached);

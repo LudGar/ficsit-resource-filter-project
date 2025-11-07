@@ -149,7 +149,6 @@ window.draw = function () {
       }
 
   // HUD
-  // HUD
   noStroke(); fill(255); textAlign(LEFT, TOP); textSize(12);
   text(
     `Leaves: ${leaves.length}  ${simulationRunning ? '(Running)' : '(Stopped)'}

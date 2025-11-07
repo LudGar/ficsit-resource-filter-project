@@ -1,4 +1,4 @@
-afunction drawBlueprintGrid() {
+function drawBlueprintGrid() {
   background(10, 24, 44);
 
   // Desired pixel spacing at 100 % zoom

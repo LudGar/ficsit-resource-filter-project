@@ -103,6 +103,7 @@ window.Tree = class {
   constructor(treeId, rootWorld) {
     this.id = treeId;
     this.branches = [];
+    this.baseColor = color(`hsl(${(treeId * 360) / SEED_COUNT}, 90%, 65%)`); // bright hue per seed
 
     const ownLeaves = leaves.filter(l => !l.reached && l.ownerId === this.id);
     let dirW = createVector(0, -1);
@@ -121,6 +122,7 @@ window.Tree = class {
     const STEP_W = mToWorld(BRANCH_LEN_M);
 
     let current = new Branch(null, rootWorld.copy(), dirW.copy());
+    current.depth = 0; // root depth = 0
     this.branches.push(current);
 
     let found = false, safety = 0;
@@ -131,6 +133,7 @@ window.Tree = class {
       }
       if (!found) {
         const next = current.nextFromWorldDir(dirW, STEP_W);
+        next.depth = (current.depth ?? 0) + 1; // track depth
         this.branches.push(next);
         current = next;
       }
@@ -143,12 +146,9 @@ window.Tree = class {
     const MAX_W = mToWorld(MAX_DIST_M);
     const STEP_W = mToWorld(BRANCH_LEN_M);
 
-    // Leaves this tree may consider
     const targetLeaves = leaves.filter(l => {
       if (l.reached) return false;
-      // Already claimed by another tree → ignore
       if (l.claimedBy !== -1 && l.claimedBy !== this.id) return false;
-      // Otherwise, prefer those that belong to this tree’s zone
       return l.ownerId === this.id || l.claimedBy === this.id;
     });
 
@@ -160,11 +160,7 @@ window.Tree = class {
         else if (d < record && d < MAX_W) { record = d; closest = b; }
       }
 
-      // First-come, first-serve claim
-      if (closest && l.claimedBy === -1) {
-        l.claimedBy = this.id;
-      }
-
+      if (closest && l.claimedBy === -1) l.claimedBy = this.id;
       if (closest && l.claimedBy === this.id && !l.reached) {
         const v = p5.Vector.sub(l.pos, closest.pos).normalize();
         closest.nextDirWorld.add(v);
@@ -172,13 +168,13 @@ window.Tree = class {
       }
     }
 
-    // Grow new branches (45° snap)
     const newBranches = [];
     for (const b of this.branches) {
       if (b.count > 0) {
         const avg = p5.Vector.div(b.nextDirWorld, b.count);
         const snapped = snapTo45World(avg);
         const next = b.nextFromWorldDir(snapped, STEP_W);
+        next.depth = (b.depth ?? 0) + 1;
         newBranches.push(next);
         b.reset();
       }

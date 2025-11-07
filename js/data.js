@@ -49,6 +49,8 @@ window.parseJsonPayload = function parseJsonPayload(data) {
   console.log(`[Data] Parsed markers: ${allMarkers.length}`);
 };
 
+allNodeMarkers = nodePoints.map(p => ({ ...p }));
+
 // Build Voronoi in WORLD space, then draw by mapping to screen
 function buildVoronoiLayerWorld() {
   if (!nodePoints || nodePoints.length === 0) return [];
@@ -69,6 +71,7 @@ function buildVoronoiLayerWorld() {
   return cells;
 }
 
+window.allNodeMarkers = [];
 window.voronoiCells = [];
 
 // FILTER -> keep WORLD coords in nodePoints

@@ -3,8 +3,8 @@
 // Current zoom bounds relative to the fitted zoom
 window.getZoomBounds = function () {
   return {
-    min: BASE_FIT_ZOOM * 0.05, // 5% of fit
-    max: BASE_FIT_ZOOM * 20    // 20× fit
+    min: BASE_FIT_ZOOM * 0.3,
+    max: BASE_FIT_ZOOM * 60
   };
 };
 

@@ -1,22 +1,27 @@
+// ---------------------
+// js/sketch.js
+// ---------------------
+
+// Blueprint grid (fixed in WORLD space, performance tuned)
 function drawBlueprintGrid() {
   background(10, 24, 44);
 
-  // Desired pixel spacing at 100 % zoom
-  const targetPx = 48;            // ⬅️ doubled from 24 → fewer dots
+  // Desired pixel spacing (larger => fewer dots)
+  const targetPx = 48;
   let stepWorld = targetPx / CAM_ZOOM;
 
-  // Snap to a nice 1-2-5 sequence
+  // Snap to 1-2-5 sequence in WORLD units
   const pow10 = Math.pow(10, Math.floor(Math.log10(stepWorld || 1)));
   const cand = [1, 2, 5].map(k => k * pow10);
-  stepWorld = cand.reduce((b, s) =>
-    Math.abs(s - stepWorld) < Math.abs(b - stepWorld) ? s : b,
+  stepWorld = cand.reduce((best, s) =>
+    Math.abs(s - stepWorld) < Math.abs(best - stepWorld) ? s : best,
   cand[0]);
 
-  // If dots would be < 2 px apart, skip small ones entirely
+  // If dots would be <2px apart, skip tiny grid (perf)
   const pxSpacing = stepWorld * CAM_ZOOM;
   if (pxSpacing < 2) return;
 
-  // View bounds in world space
+  // WORLD bounds of current viewport
   const tl = screenToWorld(0, 0);
   const br = screenToWorld(width, height);
   const minX = Math.min(tl.x, br.x);
@@ -24,15 +29,14 @@ function drawBlueprintGrid() {
   const minY = Math.min(tl.y, br.y);
   const maxY = Math.max(tl.y, br.y);
 
-  // Start aligned to grid
+  // Align start positions to grid
   const startX = Math.floor(minX / stepWorld) * stepWorld;
   const startY = Math.floor(minY / stepWorld) * stepWorld;
 
+  // Draw dots with cap
   noStroke();
   fill(180, 200, 255, 160);
   const dotSize = 2;
-
-  // Limit max dots per frame (~50 000 safe)
   let drawn = 0, maxDots = 50000;
 
   for (let x = startX; x <= maxX; x += stepWorld) {
@@ -43,7 +47,7 @@ function drawBlueprintGrid() {
     }
   }
 
-  // Major grid lines every 10 minor steps
+  // Major lines every 10 minor steps
   const majorStep = stepWorld * 10;
   stroke(80, 120, 200, 100);
   strokeWeight(1);
@@ -58,7 +62,7 @@ function drawBlueprintGrid() {
     line(p1.x, p1.y, p2.x, p2.y);
   }
 
-  // Origin crosshair
+  // World origin crosshair (0,0)
   const origin = worldToScreen(0, 0);
   stroke(255, 120, 120, 200);
   strokeWeight(2);
@@ -69,7 +73,7 @@ function drawBlueprintGrid() {
   circle(origin.x, origin.y, 4);
 }
 
-// --- Voronoi overlay (world -> screen) ---
+// Voronoi overlay (WORLD → SCREEN each frame)
 function drawVoronoiOverlay() {
   if (!voronoiCells || voronoiCells.length === 0) return;
   noFill();
@@ -85,21 +89,25 @@ function drawVoronoiOverlay() {
   }
 }
 
-// --- Load data ---
+// Load nodes.json
 window.preload = function () {
   loadJSON("nodes.json", parseJsonPayload, () => console.warn("nodes.json missing"));
 };
 
-// --- Setup ---
+// Setup
 window.setup = function () {
   createCanvas(window.innerWidth, window.innerHeight);
   pixelDensity(1);
 
-  if (typeof bindUI === "function") bindUI();
-  else console.warn("bindUI missing");
+  if (typeof bindUI === "function") {
+    bindUI();
+  } else {
+    console.warn("bindUI missing");
+  }
 
   autoFitCamera(false); // fit to world on first load
 
+  // Build UI + apply filters once data is ready
   const wait = setInterval(() => {
     if (window._dataReady) {
       clearInterval(wait);
@@ -109,12 +117,12 @@ window.setup = function () {
   }, 100);
 };
 
-// --- Draw loop ---
+// Draw
 window.draw = function () {
   if (simulationRunning) {
     runGrowthStep();
 
-    // Stop automatically once all leaves reached
+    // Auto-stop when all leaves are reached
     if (leaves.length === 0) {
       simulationRunning = false;
       const btn = document.getElementById("startBtn");
@@ -126,65 +134,86 @@ window.draw = function () {
   drawBlueprintGrid();
   drawVoronoiOverlay();
 
-  // Leaves (world -> screen)
+  // Draw leaves (WORLD → SCREEN)
   strokeWeight(1.2);
   for (const l of leaves) {
     const rgb = typeColorMap[l.type] || [160, 160, 160];
     const sw = purityStrokeMap[l.purity] ?? 140;
     stroke(sw);
     fill(rgb[0], rgb[1], rgb[2]);
+
     const p = worldToScreen(l.pos.x, l.pos.y);
     circle(p.x, p.y, 4);
   }
 
-  // Branches (world -> screen)
+  // Draw branches (WORLD → SCREEN)
   stroke(230);
   strokeWeight(1.2);
-  for (const t of trees)
-    for (const b of t.branches)
+  for (const t of trees) {
+    for (const b of t.branches) {
       if (b.parent) {
         const p1 = worldToScreen(b.pos.x, b.pos.y);
         const p2 = worldToScreen(b.parent.pos.x, b.parent.pos.y);
         line(p1.x, p1.y, p2.x, p2.y);
       }
+    }
+  }
 
   // HUD
-  noStroke(); fill(255); textAlign(LEFT, TOP); textSize(12);
+  noStroke();
+  fill(255);
+  textAlign(LEFT, TOP);
+  textSize(12);
   text(
-    `Leaves: ${leaves.length}  ${simulationRunning ? '(Running)' : '(Stopped)'}
-    Min: ${MIN_DIST_M}m  Max: ${MAX_DIST_M}m  Step: ${BRANCH_LEN_M}m  Seeds: ${SEED_COUNT}`,
+    `Leaves: ${leaves.length}  ${simulationRunning ? "(Running)" : "(Stopped)"}  ` +
+    `Min: ${MIN_DIST_M}m  Max: ${MAX_DIST_M}m  Step: ${BRANCH_LEN_M}m  Seeds: ${SEED_COUNT}`,
     10, 10
   );
-  
-// --- Camera interaction (no reproject needed; draw in world space) ---
-let dragging = false, dragStart, panStart;
+};
+
+// Camera interaction (world-space rendering → no reproject())
+let dragging = false;
+let dragStart, panStart;
+
 window.mousePressed = function () {
   dragging = true;
   dragStart = createVector(mouseX, mouseY);
   panStart = { x: CAM_PAN_X, y: CAM_PAN_Y };
 };
+
 window.mouseDragged = function () {
   if (!dragging) return;
   CAM_PAN_X = panStart.x + (mouseX - dragStart.x);
   CAM_PAN_Y = panStart.y + (mouseY - dragStart.y);
 };
-window.mouseReleased = function () { dragging = false; };
+
+window.mouseReleased = function () {
+  dragging = false;
+};
+
 window.mouseWheel = function (e) {
-  const zf = Math.pow(1.0020, -e.delta);
+  // Zoom factor
+  const zf = Math.pow(1.0020, -e.delta); // slightly snappier
   const { min, max } = getZoomBounds();
   let nz = CAM_ZOOM * zf;
   nz = Math.max(min, Math.min(max, nz));
+
   const scale = nz / CAM_ZOOM;
   CAM_ZOOM = nz;
-  // zoom to mouse
+
+  // Zoom about cursor
   CAM_PAN_X = (CAM_PAN_X - (mouseX - width / 2)) * scale + (mouseX - width / 2);
   CAM_PAN_Y = (CAM_PAN_Y - (mouseY - height / 2)) * scale + (mouseY - height / 2);
   return false;
 };
+
 window.doubleClicked = function (e) {
-  if (e && (e.ctrlKey || e.metaKey)) autoFitCamera(false);
+  if (e && (e.ctrlKey || e.metaKey)) {
+    autoFitCamera(false); // refit to world
+  }
 };
+
 window.windowResized = function () {
   resizeCanvas(window.innerWidth, window.innerHeight);
-  autoFitCamera(true); // preserve relative zoom on resize
+  autoFitCamera(true); // preserve relative zoom ratio
 };

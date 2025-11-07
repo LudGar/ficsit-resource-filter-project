@@ -20,14 +20,19 @@
 </head>
 <body>
   <div id="ui" class="glass movable">
-    <div class="titlebar" id="uiTitle">🌿 Space Colonization</div>
-    <div class="content">
-
+    <div class="titlebar" id="uiTitle">🌿 FICSIT 🌿</div><div class="content">
       <div class="group">
-        <label>Seed radius (world)</label>
-        <input id="seedRadius" type="range" min="50000" max="300000" value="200000" />
+        <div class="group-header">
+          <span>Seeds</span>
+        </div>
+        <label>Seed count</label>
+        <input id="seedCount" type="number" min="1" max="128" step="1" value="8" />
+    
+        <label>Seed radius (m)</label>
+        <input id="seedRadiusM" type="number" min="1" step="1" value="2000" />
       </div>
-
+    
+      <!-- Filters -->
       <div class="group">
         <div class="group-header">
           <span>Types</span>
@@ -38,7 +43,7 @@
         </div>
         <div id="typesContainer" class="chip-list"></div>
       </div>
-
+    
       <div class="group">
         <div class="group-header">
           <span>Purity</span>
@@ -49,22 +54,23 @@
         </div>
         <div id="puritiesContainer" class="chip-list"></div>
       </div>
-
+    
       <div class="counts">Nodes selected: <span id="nodesCount">0</span></div>
-
-      <label>minDist</label>
-      <input id="minDist" type="range" min="2" max="60" value="12" />
-
-      <label>maxDist</label>
-      <input id="maxDist" type="range" min="10" max="300" value="60" />
-
-      <label>branchLen</label>
-      <input id="branchLen" type="range" min="2" max="20" value="6" />
-
+    
+      <!-- Growth parameters in METERS -->
+      <div class="group">
+        <div class="group-header"><span>Growth (meters)</span></div>
+        <label>Min distance (m)</label>
+        <input id="minDistM" type="number" min="0.1" step="0.1" value="12" />
+        <label>Max distance (m)</label>
+        <input id="maxDistM" type="number" min="0.1" step="0.1" value="60" />
+        <label>Branch length (m)</label>
+        <input id="branchLenM" type="number" min="0.1" step="0.1" value="6" />
+      </div>
+    
       <button id="resetBtn">Reset</button>
       <button id="startBtn">Start Growth</button>
     </div>
-  </div>
 
   <div id="hint" class="glass">🖱️ Drag = Pan  Wheel = Zoom  Ctrl+Double-click = Fit</div>
 </body>

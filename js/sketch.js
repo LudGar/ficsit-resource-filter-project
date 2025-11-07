@@ -170,7 +170,7 @@ window.mouseDragged = function () {
 };
 window.mouseReleased = function () { dragging = false; };
 window.mouseWheel = function (e) {
-  const zf = Math.pow(1.0015, -e.delta);
+  const zf = Math.pow(1.0020, -e.delta);
   const { min, max } = getZoomBounds();
   let nz = CAM_ZOOM * zf;
   nz = Math.max(min, Math.min(max, nz));

@@ -158,7 +158,7 @@ window.draw = function () {
     
         // depth-based brightness fade
         const d = b.depth ?? 0;
-        const fade = constrain(map(d, 0, 120, 1.0, 0.1), 0.1, 1.0);
+        const fade = constrain(map(d, 0, 1200, 1.0, 0.1), 0.1, 1.0);
     
         const base = t.baseColor;
         const branchColor = lerpColor(base, color(0, 0, 0), 1 - fade);

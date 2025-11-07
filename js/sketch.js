@@ -1,7 +1,3 @@
-// ---------------------
-// js/sketch.js
-// ---------------------
-
 // Blueprint grid (fixed in WORLD space, performance tuned)
 function drawBlueprintGrid() {
   background(10, 24, 44);
@@ -73,6 +69,33 @@ function drawBlueprintGrid() {
   circle(origin.x, origin.y, 4);
 }
 
+// ---Static overlay of all original node data ---
+function drawNodeOverlay() {
+  if (!allNodeMarkers || allNodeMarkers.length === 0) return;
+
+  push();
+  noStroke();
+
+  for (const n of allNodeMarkers) {
+    const rgb = typeColorMap[n.type] || [200, 200, 200];
+    const sw = purityStrokeMap[n.purity] ?? 140;
+
+    const p = worldToScreen(n.x, n.y);
+
+    // glow around node
+    fill(rgb[0], rgb[1], rgb[2], 50);
+    circle(p.x, p.y, 14);
+
+    // solid core
+    fill(rgb[0], rgb[1], rgb[2]);
+    stroke(sw);
+    strokeWeight(1);
+    circle(p.x, p.y, 6);
+  }
+
+  pop();
+}
+
 // Voronoi overlay (WORLD → SCREEN each frame)
 function drawVoronoiOverlay() {
   if (!voronoiCells || voronoiCells.length === 0) return;
@@ -131,8 +154,9 @@ window.draw = function () {
     }
   }
 
-  drawBlueprintGrid();
+  drawNodeOverlay();
   drawVoronoiOverlay();
+  drawBlueprintGrid();
 
   // Draw leaves (WORLD → SCREEN)
   strokeWeight(1.2);

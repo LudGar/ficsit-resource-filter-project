@@ -149,13 +149,14 @@ window.draw = function () {
       }
 
   // HUD
-  noStroke();
-  fill(255);
-  textAlign(LEFT, TOP);
-  textSize(12);
-  text(`Leaves: ${leaves.length}  ${simulationRunning ? "(Running)" : "(Stopped)"}`, 10, 10);
-};
-
+  // HUD
+  noStroke(); fill(255); textAlign(LEFT, TOP); textSize(12);
+  text(
+    `Leaves: ${leaves.length}  ${simulationRunning ? '(Running)' : '(Stopped)'}
+  Min: ${MIN_DIST_M}m  Max: ${MAX_DIST_M}m  Step: ${BRANCH_LEN_M}m  Seeds: ${SEED_COUNT}`,
+    10, 10
+  );
+  
 // --- Camera interaction (no reproject needed; draw in world space) ---
 let dragging = false, dragStart, panStart;
 window.mousePressed = function () {

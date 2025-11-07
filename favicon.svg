@@ -1,0 +1,52 @@
+<!-- favicon.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Space Colonization">
+  <!-- Blueprint circle background -->
+  <defs>
+    <radialGradient id="g" cx="50%" cy="40%" r="70%">
+      <stop offset="0%"  stop-color="#11264a"/>
+      <stop offset="100%" stop-color="#0a1836"/>
+    </radialGradient>
+  </defs>
+  <circle cx="256" cy="256" r="248" fill="url(#g)"/>
+
+  <!-- Subtle dotted grid (sparse for favicon clarity) -->
+  <g fill="#b7cff7" opacity=".35">
+    <!-- 5x5 grid, centered -->
+    <circle cx="136" cy="136" r="4"/>
+    <circle cx="256" cy="136" r="4"/>
+    <circle cx="376" cy="136" r="4"/>
+
+    <circle cx="136" cy="256" r="4"/>
+    <circle cx="256" cy="256" r="4"/>
+    <circle cx="376" cy="256" r="4"/>
+
+    <circle cx="136" cy="376" r="4"/>
+    <circle cx="256" cy="376" r="4"/>
+    <circle cx="376" cy="376" r="4"/>
+  </g>
+
+  <!-- 8 seeds on a circle (every 45°) -->
+  <g fill="#aad3ff">
+    <circle cx="256" cy="86"  r="8"/>
+    <circle cx="332" cy="110" r="8"/>
+    <circle cx="402" cy="180" r="8"/>
+    <circle cx="426" cy="256" r="8"/>
+    <circle cx="402" cy="332" r="8"/>
+    <circle cx="332" cy="402" r="8"/>
+    <circle cx="256" cy="426" r="8"/>
+    <circle cx="180" cy="402" r="8"/>
+    <circle cx="110" cy="332" r="8"/>
+    <circle cx="86"  cy="256" r="8"/>
+    <circle cx="110" cy="180" r="8"/>
+    <circle cx="180" cy="110" r="8"/>
+  </g>
+
+  <!-- Branch/trunk with 45° snapped segments -->
+  <g fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <!-- main trunk from inner circle to upper-right seed -->
+    <path d="M 256 256 L 296 216 L 336 216 L 376 176 L 402 180"/>
+    <!-- a couple tiny sub-branches -->
+    <path d="M 296 216 L 296 176"/>
+    <path d="M 336 216 L 356 196"/>
+  </g>
+</svg>

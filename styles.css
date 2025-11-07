@@ -1,0 +1,93 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0b1526;
+  color: #fff;
+}
+
+.glass {
+  background: rgba(30, 40, 60, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  border-radius: 10px;
+}
+
+#ui {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: 260px;
+  user-select: none;
+}
+
+.titlebar {
+  font-weight: 600;
+  padding: 8px 12px;
+  cursor: move;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+}
+
+.content {
+  padding: 12px;
+}
+
+.group {
+  margin-bottom: 14px;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chip input {
+  margin-right: 4px;
+}
+
+button {
+  width: 100%;
+  margin-top: 6px;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #3498db;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.mini {
+  width: auto;
+  padding: 2px 6px;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+#hint {
+  position: fixed;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #aad3ff;
+}

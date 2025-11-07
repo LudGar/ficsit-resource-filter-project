@@ -149,11 +149,22 @@ window.draw = function () {
   // Draw branches (WORLD → SCREEN)
   stroke(230);
   strokeWeight(1.2);
-  for (const t of trees) {
-    for (const b of t.branches) {
-      if (b.parent) {
+    for (const t of trees) {
+      for (const b of t.branches) {
+        if (!b.parent) continue;
+    
         const p1 = worldToScreen(b.pos.x, b.pos.y);
         const p2 = worldToScreen(b.parent.pos.x, b.parent.pos.y);
+    
+        // depth-based brightness fade
+        const d = b.depth ?? 0;
+        const fade = constrain(map(d, 0, 80, 1.0, 0.2), 0.2, 1.0);
+    
+        const base = t.baseColor;
+        const branchColor = lerpColor(base, color(0, 0, 0), 1 - fade);
+    
+        stroke(branchColor);
+        strokeWeight(1.3);
         line(p1.x, p1.y, p2.x, p2.y);
       }
     }

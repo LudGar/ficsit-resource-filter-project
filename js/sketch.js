@@ -220,7 +220,7 @@ window.draw = function () {
   
   drawBlueprintGrid();
   drawMapLayer();
-  drawVoronoiOverlay();
+  //drawVoronoiOverlay();
   drawNodeOverlay();
 
 

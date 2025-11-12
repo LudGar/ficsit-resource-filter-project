@@ -39,6 +39,17 @@ function drawMapLayer() {
   pop();
 }
 
+function drawRegularPolygon(cx, cy, r, sides) {
+  beginShape();
+  for (let i = 0; i < sides; i++) {
+    const angle = TWO_PI * (i / sides) - HALF_PI;
+    const x = cx + r * Math.cos(angle);
+    const y = cy + r * Math.sin(angle);
+    vertex(x, y);
+  }
+  endShape(CLOSE);
+}
+
 function drawBlueprintGrid() {
   background(10, 24, 44);
   
@@ -105,29 +116,50 @@ function drawNodeOverlay() {
   if (!allNodeMarkers || allNodeMarkers.length === 0) return;
 
   push();
-  noStroke();
+  textAlign(CENTER, CENTER);
+  textSize(8);
 
   for (const n of allNodeMarkers) {
     const rgb = typeColorMap[n.type] || [200, 200, 200];
-    const sw = purityStrokeMap[n.purity] ?? 140;
-
+    const strokeVal = purityStrokeMap[n.purity] ?? 140;
     const p = worldToScreen(n.x, n.y);
 
-    // glow around node
-    fill(rgb[0], rgb[1], rgb[2], 50);
-    circle(p.x, p.y, 14);
-
-    // solid core
-    fill(rgb[0], rgb[1], rgb[2]);
-    stroke(sw);
+    // Fill color from type
+    fill(rgb[0], rgb[1], rgb[2], 230);
+    stroke(strokeVal);
     strokeWeight(1);
-    circle(p.x, p.y, 6);
+
+    const rOuter = 6;
+    const rInner = 3;
+
+    switch (n.purity) {
+      case "impure":
+        // circle
+        circle(p.x, p.y, rOuter * 2);
+        break;
+      case "normal":
+        // triangle
+        drawRegularPolygon(p.x, p.y, rOuter, 3);
+        break;
+      case "pure":
+        // hexagon
+        drawRegularPolygon(p.x, p.y, rOuter, 6);
+        break;
+      default:
+        // fallback: square
+        drawRegularPolygon(p.x, p.y, rOuter, 4);
+        break;
+    }
+
+    // small inner core
+    noStroke();
+    fill(0, 0, 0, 120);
+    circle(p.x, p.y, rInner * 2);
   }
 
   pop();
 }
 
-// Voronoi overlay (WORLD → SCREEN each frame)
 function drawVoronoiOverlay() {
   if (!voronoiCells || voronoiCells.length === 0) return;
   noFill();

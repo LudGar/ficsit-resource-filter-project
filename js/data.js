@@ -9,9 +9,7 @@ function hslToRgb(h, s, l) {
   return [f(0), f(8), f(4)];
 }
 
-// Global sets from config.js
-// availableTypes, availablePurities, selectedTypes, selectedPurities,
-// allMarkers, filteredMarkers, nodePoints, typeColorMap
+window.allNodeMarkers = [];
 
 window.parseJsonPayload = function parseJsonPayload(data) {
   if (!data || !data.options) return;
@@ -71,10 +69,8 @@ function buildVoronoiLayerWorld() {
   return cells;
 }
 
-window.allNodeMarkers = [];
 window.voronoiCells = [];
 
-// FILTER -> keep WORLD coords in nodePoints
 window.applyFilters = function () {
   filteredMarkers = allMarkers.filter(
     m => selectedTypes.has(m.type) && selectedPurities.has(m.purity)
@@ -83,11 +79,14 @@ window.applyFilters = function () {
   // WORLD coordinates (no projection)
   nodePoints = filteredMarkers.map(m => ({ x: m.x, y: m.y }));
 
+  // Keep a static copy for the overlay layer
+  allNodeMarkers = filteredMarkers.map(m => ({ ...m }));
+
   const c = document.getElementById("nodesCount");
   if (c) c.textContent = String(nodePoints.length);
 
-  rebuildForestFromProjected();        // will read nodePoints (world)
-  window.voronoiCells = buildVoronoiLayerWorld(); // world polygons
+  rebuildForestFromProjected();
+  window.voronoiCells = buildVoronoiLayerWorld();
 
   console.log(`[Data] applyFilters(): ${nodePoints.length} nodes visible`);
 };

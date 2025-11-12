@@ -1,23 +1,59 @@
-// Blueprint grid (fixed in WORLD space, performance tuned)
+let mapTiles = {
+  "0-0": null, // top-left
+  "0-1": null, // bottom-left
+  "1-0": null, // top-right
+  "1-1": null  // bottom-right
+};
+
+function drawMapTile(img, wx1, wy1, wx2, wy2) {
+  if (!img) return;
+  
+  const p1 = worldToScreen(wx1, wy1); // top-left
+  const p2 = worldToScreen(wx2, wy2); // bottom-right
+
+  const sx = p1.x;
+  const sy = p1.y;
+  const sw = p2.x - p1.x;
+  const sh = p2.y - p1.y;
+
+  image(img, sx, sy, sw, sh);
+}
+
+function drawMapLayer() {
+  const { W, E, N, S } = WORLD;
+  const midX = (W + E) / 2;
+  const midY = (N + S) / 2;
+
+  push();
+  tint(255, 210);
+
+  // Map_0-0: top-left
+  drawMapTile(mapTiles["0-0"], W, N, midX, midY);
+  // Map_0-1: bottom-left
+  drawMapTile(mapTiles["0-1"], W, midY, midX, S);
+  // Map_1-0: top-right
+  drawMapTile(mapTiles["1-0"], midX, N, E, midY);
+  // Map_1-1: bottom-right
+  drawMapTile(mapTiles["1-1"], midX, midY, E, S);
+
+  pop();
+}
+
 function drawBlueprintGrid() {
   background(10, 24, 44);
-
-  // Desired pixel spacing (larger => fewer dots)
+  
   const targetPx = 48;
   let stepWorld = targetPx / CAM_ZOOM;
-
-  // Snap to 1-2-5 sequence in WORLD units
+  
   const pow10 = Math.pow(10, Math.floor(Math.log10(stepWorld || 1)));
   const cand = [1, 2, 5].map(k => k * pow10);
   stepWorld = cand.reduce((best, s) =>
     Math.abs(s - stepWorld) < Math.abs(best - stepWorld) ? s : best,
   cand[0]);
-
-  // If dots would be <2px apart, skip tiny grid (perf)
+  
   const pxSpacing = stepWorld * CAM_ZOOM;
   if (pxSpacing < 2) return;
 
-  // WORLD bounds of current viewport
   const tl = screenToWorld(0, 0);
   const br = screenToWorld(width, height);
   const minX = Math.min(tl.x, br.x);
@@ -25,11 +61,9 @@ function drawBlueprintGrid() {
   const minY = Math.min(tl.y, br.y);
   const maxY = Math.max(tl.y, br.y);
 
-  // Align start positions to grid
   const startX = Math.floor(minX / stepWorld) * stepWorld;
   const startY = Math.floor(minY / stepWorld) * stepWorld;
 
-  // Draw dots with cap
   noStroke();
   fill(180, 200, 255, 160);
   const dotSize = 2;
@@ -43,7 +77,6 @@ function drawBlueprintGrid() {
     }
   }
 
-  // Major lines every 10 minor steps
   const majorStep = stepWorld * 10;
   stroke(80, 120, 200, 100);
   strokeWeight(1);
@@ -58,7 +91,6 @@ function drawBlueprintGrid() {
     line(p1.x, p1.y, p2.x, p2.y);
   }
 
-  // World origin crosshair (0,0)
   const origin = worldToScreen(0, 0);
   stroke(255, 120, 120, 200);
   strokeWeight(2);
@@ -69,7 +101,6 @@ function drawBlueprintGrid() {
   circle(origin.x, origin.y, 4);
 }
 
-// ---Static overlay of all original node data ---
 function drawNodeOverlay() {
   if (!allNodeMarkers || allNodeMarkers.length === 0) return;
 
@@ -112,12 +143,16 @@ function drawVoronoiOverlay() {
   }
 }
 
-// Load nodes.json
 window.preload = function () {
   loadJSON("nodes.json", parseJsonPayload, () => console.warn("nodes.json missing"));
+
+  // adjust paths if needed (e.g. "assets/Map_0-0.png")
+  mapTiles["0-0"] = loadImage("img/Map_0-0.png");
+  mapTiles["0-1"] = loadImage("img/Map_0-1.png");
+  mapTiles["1-0"] = loadImage("img/Map_1-0.png");
+  mapTiles["1-1"] = loadImage("img/Map_1-1.png");
 };
 
-// Setup
 window.setup = function () {
   createCanvas(window.innerWidth, window.innerHeight);
   pixelDensity(1);
@@ -128,9 +163,8 @@ window.setup = function () {
     console.warn("bindUI missing");
   }
 
-  autoFitCamera(false); // fit to world on first load
+  autoFitCamera(false);
 
-  // Build UI + apply filters once data is ready
   const wait = setInterval(() => {
     if (window._dataReady) {
       clearInterval(wait);
@@ -140,12 +174,10 @@ window.setup = function () {
   }, 100);
 };
 
-// Draw
 window.draw = function () {
   if (simulationRunning) {
     runGrowthStep();
-
-    // Auto-stop when all leaves are reached
+    
     if (leaves.length === 0) {
       simulationRunning = false;
       const btn = document.getElementById("startBtn");
@@ -153,12 +185,12 @@ window.draw = function () {
       console.log("[Simulation] Growth complete — all leaves reached.");
     }
   }
-
+  
+  drawMapLayer();
   drawNodeOverlay();
   drawVoronoiOverlay();
   drawBlueprintGrid();
 
-  // Draw leaves (WORLD → SCREEN)
   strokeWeight(1.2);
   for (const l of leaves) {
     const rgb = typeColorMap[l.type] || [160, 160, 160];
@@ -170,7 +202,6 @@ window.draw = function () {
     circle(p.x, p.y, 4);
   }
 
-  // Draw branches (WORLD → SCREEN)
   stroke(230);
   strokeWeight(1.2);
     for (const t of trees) {
@@ -193,7 +224,6 @@ window.draw = function () {
       }
     }
   
-  // HUD
   noStroke();
   fill(255);
   textAlign(LEFT, TOP);
@@ -205,7 +235,6 @@ window.draw = function () {
   );
 };
 
-// Camera interaction (world-space rendering → no reproject())
 let dragging = false;
 let dragStart, panStart;
 
@@ -226,8 +255,7 @@ window.mouseReleased = function () {
 };
 
 window.mouseWheel = function (e) {
-  // Zoom factor
-  const zf = Math.pow(1.0020, -e.delta); // slightly snappier
+  const zf = Math.pow(1.0020, -e.delta);
   const { min, max } = getZoomBounds();
   let nz = CAM_ZOOM * zf;
   nz = Math.max(min, Math.min(max, nz));
@@ -235,7 +263,7 @@ window.mouseWheel = function (e) {
   const scale = nz / CAM_ZOOM;
   CAM_ZOOM = nz;
 
-  // Zoom about cursor
+
   CAM_PAN_X = (CAM_PAN_X - (mouseX - width / 2)) * scale + (mouseX - width / 2);
   CAM_PAN_Y = (CAM_PAN_Y - (mouseY - height / 2)) * scale + (mouseY - height / 2);
   return false;
@@ -243,11 +271,11 @@ window.mouseWheel = function (e) {
 
 window.doubleClicked = function (e) {
   if (e && (e.ctrlKey || e.metaKey)) {
-    autoFitCamera(false); // refit to world
+    autoFitCamera(false);
   }
 };
 
 window.windowResized = function () {
   resizeCanvas(window.innerWidth, window.innerHeight);
-  autoFitCamera(true); // preserve relative zoom ratio
+  autoFitCamera(true);
 };

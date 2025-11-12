@@ -218,10 +218,11 @@ window.draw = function () {
     }
   }
   
-  drawMapLayer();
-  drawNodeOverlay();
-  drawVoronoiOverlay();
   drawBlueprintGrid();
+  drawMapLayer();
+  drawVoronoiOverlay();
+  drawNodeOverlay();
+
 
   strokeWeight(1.2);
   for (const l of leaves) {

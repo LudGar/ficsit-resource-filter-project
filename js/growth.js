@@ -4,13 +4,20 @@ function mToWorld(m) { return m * WORLD_UNITS_PER_METER; }
 // ---- Seeds ----
 function getCurrentSeedWorlds() {
   const { W, E, N, S } = WORLD;
-  const cx = (W + E) / 2, cy = (N + S) / 2;
-  const R = SEED_RADIUS_WORLD;
+  const cx = (W + E) / 2;
+  const cy = (N + S) / 2;
+  const R  = SEED_RADIUS_WORLD;
   const seeds = [];
-  const stepDeg = 360 / Math.max(1, SEED_COUNT);
+
+  const stepDeg   = 360 / Math.max(1, SEED_COUNT);
+  const offsetRad = radians(SEED_ROTATION_DEG); // rotation control
+
   for (let i = 0; i < SEED_COUNT; i++) {
-    const a = radians(i * stepDeg);
-    seeds.push({ x: cx + R * Math.cos(a), y: cy + R * Math.sin(a) });
+    const a = offsetRad + radians(i * stepDeg);
+    seeds.push({
+      x: cx + R * Math.cos(a),
+      y: cy + R * Math.sin(a)
+    });
   }
   return seeds;
 }

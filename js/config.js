@@ -21,6 +21,12 @@ window.MIN_DIST_M   = 12;   // meters
 window.MAX_DIST_M   = 60;   // meters
 window.BRANCH_LEN_M = 6;    // meters
 
+// Origin mode: "game" = actual (0,0) from data, "world" = center of WORLD bounds
+window.originMode = "game";
+
+// Seed rotation (in degrees, 0 = first seed at "east" on the circle)
+window.SEED_ROTATION_DEG = 0;
+
 // Seeds
 window.SEED_COUNT = 8;
 window.SEED_RADIUS_M = 2000;

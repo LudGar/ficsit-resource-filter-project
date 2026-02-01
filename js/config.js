@@ -34,19 +34,19 @@ window.SEED_RADIUS_WORLD = SEED_RADIUS_M * WORLD_UNITS_PER_METER;
 
 // Sim state
 window.simulationRunning = false;
-window.leaves  = [];
-window.trees   = [];
-window.seedsWorld = [];
+window.leaves  =          [];
+window.trees   =          [];
+window.seedsWorld =       [];
 
 // Data / filters
-window.allMarkers = [];
-window.filteredMarkers = [];
-window.nodePoints = [];
+window.allMarkers =       [];
+window.filteredMarkers =  [];
+window.nodePoints =       [];
 
-window.availableTypes = new Set();
+window.availableTypes =    new Set();
 window.availablePurities = new Set();
-window.selectedTypes = new Set();
-window.selectedPurities = new Set();
+window.selectedTypes =     new Set();
+window.selectedPurities =  new Set();
 
 window.typeColorMap = {};
 window.purityStrokeMap = { impure: 80, normal: 160, pure: 255 };

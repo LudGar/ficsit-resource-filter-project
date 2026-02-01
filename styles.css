@@ -34,6 +34,13 @@ body {
   padding: 12px;
 }
 
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+}
+
 .group {
   margin-bottom: 14px;
 }

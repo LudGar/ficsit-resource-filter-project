@@ -274,9 +274,10 @@ window.draw = function () {
   
   drawBlueprintGrid();
   drawMapLayer();
+  drawNodeOverlay();
   drawSeedsLayer();
   //drawVoronoiOverlay();
-  drawNodeOverlay();
+
 
 
   strokeWeight(1.2);

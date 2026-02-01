@@ -59,6 +59,49 @@ function drawRegularPolygon(cx, cy, r, sides) {
   endShape(CLOSE);
 }
 
+function drawSeedsLayer() {
+  if (!seedsWorld || seedsWorld.length === 0) return;
+
+  const { W, E, N, S } = WORLD;
+  const cx = (W + E) / 2;
+  const cy = (N + S) / 2;
+
+  const centerScreen = worldToScreen(cx, cy);
+  const rPoint = worldToScreen(cx + SEED_RADIUS_WORLD, cy);
+  const radiusPx = Math.abs(rPoint.x - centerScreen.x);
+
+  push();
+
+  // Seed radius circle
+  noFill();
+  stroke(120, 200, 255, 140);
+  strokeWeight(1.5);
+  circle(centerScreen.x, centerScreen.y, radiusPx * 2);
+
+  // Seed markers (use tree base colors if available)
+  for (let i = 0; i < seedsWorld.length; i++) {
+    const s = seedsWorld[i];
+    const p = worldToScreen(s.x, s.y);
+
+    let col = color(255);
+    if (trees && trees[i] && trees[i].baseColor) {
+      col = trees[i].baseColor;
+    }
+
+    fill(col);
+    stroke(0, 160);
+    strokeWeight(1);
+    circle(p.x, p.y, 10);
+
+    // tiny dot in middle for clarity
+    noStroke();
+    fill(0, 150);
+    circle(p.x, p.y, 3);
+  }
+
+  pop();
+}
+
 function drawBlueprintGrid() {
   background(10, 24, 44);
   
@@ -231,6 +274,7 @@ window.draw = function () {
   
   drawBlueprintGrid();
   drawMapLayer();
+  drawSeedsLayer();
   //drawVoronoiOverlay();
   drawNodeOverlay();
 

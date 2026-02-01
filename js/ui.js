@@ -131,6 +131,14 @@ window.bindUI = function () {
     rebuildForestFromProjected();
   };
 
+  const originRadios = document.querySelectorAll('input[name="originMode"]');
+    originRadios.forEach(r => {
+      r.addEventListener('change', e => {
+        if (!e.target.checked) return;
+        originMode = e.target.value === 'world' ? 'world' : 'game';
+      });
+    });
+  
   // --- Draggable panel ---
   const ui = document.getElementById('ui');
   const title = document.getElementById('uiTitle');

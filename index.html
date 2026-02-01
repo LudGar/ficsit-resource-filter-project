@@ -21,17 +21,35 @@
 <body>
   <div id="ui" class="glass movable">
     <div class="titlebar" id="uiTitle">🌿 FICSIT 🌿</div><div class="content">
+      
       <div class="group">
         <div class="group-header">
           <span>Seeds</span>
         </div>
         <label>Seed count</label>
-        <input id="seedCount" type="number" min="1" max="12" step="1" value="8" />
-    
+        <input id="seedCount" type="number" min="1" max="128" step="1" value="8" />
+      
         <label>Seed radius (m)</label>
-        <input id="seedRadiusM" type="number" min="200" step="100" value="2000" />
+        <input id="seedRadiusM" type="number" min="1" step="1" value="2000" />
+      
+        <label>Seed rotation (°)</label>
+        <input id="seedRotation" type="number" step="1" value="0" />
       </div>
-    
+      <!-- Center -->
+      <div class="group">
+        <div class="group-header">
+          <span>Origin</span>
+        </div>
+        <label class="inline">
+          <input type="radio" name="originMode" value="game" checked />
+          Game 0,0
+        </label>
+        <label class="inline">
+          <input type="radio" name="originMode" value="world" />
+          World center
+        </label>
+      </div>
+      
       <!-- Filters -->
       <div class="group">
         <div class="group-header">

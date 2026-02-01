@@ -17,9 +17,9 @@ window.ZOOM_MAX_MULT = 60;
 window.WORLD_UNITS_PER_METER = 100;
 
 // Growth parameters (in METERS)
-window.MIN_DIST_M   = 12;   // meters
-window.MAX_DIST_M   = 60;   // meters
-window.BRANCH_LEN_M = 6;    // meters
+window.MIN_DIST_M   = 57;   // meters
+window.MAX_DIST_M   = 560;   // meters
+window.BRANCH_LEN_M = 56;    // meters
 
 // Origin mode: "game" = actual (0,0) from data, "world" = center of WORLD bounds
 window.originMode = "game";

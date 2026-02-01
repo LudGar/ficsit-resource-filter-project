@@ -5,6 +5,15 @@ let mapTiles = {
   "1-1": null  // bottom-right
 };
 
+function getOriginWorldPoint() {
+  const { W, E, N, S } = WORLD;
+  if (originMode === 'world') {
+    return { x: (W + E) / 2, y: (N + S) / 2 }; // map center
+  } else {
+    return { x: 0, y: 0 }; // game (0,0)
+  }
+}
+
 function drawMapTile(img, wx1, wy1, wx2, wy2) {
   if (!img) return;
   
@@ -102,7 +111,9 @@ function drawBlueprintGrid() {
     line(p1.x, p1.y, p2.x, p2.y);
   }
 
-  const origin = worldToScreen(0, 0);
+  // Origin crosshair (either game 0,0 or world center)
+  const ow = getOriginWorldPoint();
+  const origin = worldToScreen(ow.x, ow.y);
   stroke(255, 120, 120, 200);
   strokeWeight(2);
   line(origin.x - 10, origin.y, origin.x + 10, origin.y);

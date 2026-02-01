@@ -340,7 +340,7 @@ window.draw = function () {
   drawMapLayer();
   drawNodeOverlay();
   drawSeedsLayer();
-  drawVoronoiOverlay();
+  //drawVoronoiOverlay();
 
   // --- Mouse coordinates (WORLD) ---
   const mw = screenToWorld(mouseX, mouseY);

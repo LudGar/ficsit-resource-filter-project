@@ -5,6 +5,70 @@ let mapTiles = {
   "1-1": null  // bottom-right
 };
 
+function fmt(n, digits = 0) {
+  return Number.isFinite(n) ? n.toFixed(digits) : "0";
+}
+
+function pickHoverNode(mx, my) {
+  if (!allNodeMarkers || allNodeMarkers.length === 0) return null;
+
+  // Hover radius in pixels (constant regardless of zoom)
+  const R = 10;
+  let best = null;
+  let bestD2 = R * R;
+
+  for (const n of allNodeMarkers) {
+    const p = worldToScreen(n.x, n.y);
+    const dx = mx - p.x;
+    const dy = my - p.y;
+    const d2 = dx * dx + dy * dy;
+    if (d2 <= bestD2) {
+      bestD2 = d2;
+      best = n;
+    }
+  }
+  return best;
+}
+
+function drawTooltip(mx, my, lines, accentRGB) {
+  const pad = 8;
+  const lineH = 14;
+
+  textSize(12);
+  textAlign(LEFT, TOP);
+
+  // measure
+  let w = 0;
+  for (const s of lines) w = Math.max(w, textWidth(s));
+  const boxW = w + pad * 2;
+  const boxH = lines.length * lineH + pad * 2;
+
+  // keep inside window
+  let x = mx + 14;
+  let y = my + 14;
+  if (x + boxW > width - 6) x = mx - boxW - 14;
+  if (y + boxH > height - 6) y = my - boxH - 14;
+
+  push();
+  noStroke();
+  fill(18, 22, 28, 220);
+  rect(x, y, boxW, boxH, 10);
+
+  // accent bar
+  if (accentRGB && accentRGB.length === 3) {
+    fill(accentRGB[0], accentRGB[1], accentRGB[2], 220);
+    rect(x, y, 4, boxH, 10);
+  }
+
+  fill(255);
+  let ty = y + pad;
+  for (const s of lines) {
+    text(s, x + pad + 6, ty);
+    ty += lineH;
+  }
+  pop();
+}
+
 function getOriginWorldPoint() {
   const { W, E, N, S } = WORLD;
   if (originMode === 'world') {
@@ -276,10 +340,45 @@ window.draw = function () {
   drawMapLayer();
   drawNodeOverlay();
   drawSeedsLayer();
-  //drawVoronoiOverlay();
+  drawVoronoiOverlay();
 
-
-
+  // --- Mouse coordinates (WORLD) ---
+  const mw = screenToWorld(mouseX, mouseY);
+  push();
+  noStroke();
+  fill(255);
+  textAlign(LEFT, BOTTOM);
+  textSize(12);
+  text(
+    `Mouse WORLD: x ${fmt(mw.x, 1)}  y ${fmt(mw.y, 1)}`,
+    10,
+    height - 10
+  );
+  pop();
+  
+  // --- Hover tooltip for nodes ---
+  const hovered = pickHoverNode(mouseX, mouseY);
+  if (hovered) {
+    const rgb = typeColorMap[hovered.type] || [200, 200, 200];
+  
+    // subtle highlight ring
+    const p = worldToScreen(hovered.x, hovered.y);
+    push();
+    noFill();
+    stroke(rgb[0], rgb[1], rgb[2], 220);
+    strokeWeight(2);
+    circle(p.x, p.y, 18);
+    pop();
+  
+    // tooltip lines
+    const lines = [
+      `${hovered.type} · ${hovered.purity}`,
+      `x ${fmt(hovered.x, 1)}  y ${fmt(hovered.y, 1)}`
+    ];
+  
+    drawTooltip(mouseX, mouseY, lines, rgb);
+  }
+  
   strokeWeight(1.2);
   for (const l of leaves) {
     const rgb = typeColorMap[l.type] || [160, 160, 160];

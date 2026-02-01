@@ -66,16 +66,17 @@ window.bindUI = function () {
   // --- Seeds: count + radius (meters) ---
   const seedCount    = $('seedCount');
   const seedRadiusM  = $('seedRadiusM');
-
+  const seedRotation = $('seedRotation');
+  
   if (seedCount) {
     const apply = () => {
       SEED_COUNT = Math.max(1, Math.floor(num(seedCount.value) || 1));
-      rebuildForestFromProjected(); // seed layout changes -> rebuild always
+      rebuildForestFromProjected();
     };
     seedCount.addEventListener('input', apply);
     seedCount.addEventListener('change', apply);
   }
-
+  
   if (seedRadiusM) {
     const apply = () => {
       SEED_RADIUS_M = Math.max(0, num(seedRadiusM.value) || 0);
@@ -85,7 +86,16 @@ window.bindUI = function () {
     seedRadiusM.addEventListener('input', apply);
     seedRadiusM.addEventListener('change', apply);
   }
-
+  
+  if (seedRotation) {
+    const apply = () => {
+      SEED_ROTATION_DEG = num(seedRotation.value) || 0;
+      rebuildForestFromProjected();
+    };
+    seedRotation.addEventListener('input', apply);
+    seedRotation.addEventListener('change', apply);
+  }
+  
   // --- Filter bulk actions ---
   const typesAllBtn   = $('typesAllBtn');
   const typesNoneBtn  = $('typesNoneBtn');

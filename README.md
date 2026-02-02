@@ -45,31 +45,6 @@ The app loads real in-game resource node data, visualizes it in world space, and
 
 ---
 
-## 🧩 Project Structure
-
-/index.html
-/styles.css
-
-/js
-├─ sketch.js # Rendering, camera, input, map, overlays
-├─ growth.js # Space colonization algorithm & tree logic
-├─ data.js # JSON parsing, node preparation
-├─ ui.js # UI construction & interaction
-└─ config.js # Global constants & configuration
-
-/img
-├─ Map_0-0.png
-├─ Map_0-1.png
-├─ Map_1-0.png
-└─ Map_1-1.png
-
-/nodes.json # Resource node dataset
-
-
-All JavaScript runs in **p5.js global mode** (no ES modules) to keep loading order simple and debuggable.
-
----
-
 ## 📦 Data Format
 
 The app expects a `nodes.json` file structured similarly to:

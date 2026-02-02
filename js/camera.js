@@ -1,6 +1,3 @@
-// --- CAMERA TRANSFORMS (GLOBAL) ---
-
-// Current zoom bounds relative to the fitted zoom
 window.getZoomBounds = function () {
   return {
     min: BASE_FIT_ZOOM * 0.3,
@@ -8,7 +5,6 @@ window.getZoomBounds = function () {
   };
 };
 
-// Fit the full WORLD rect [W,E]×[N,S] to the window
 window.autoFitCamera = function (preserve = false) {
   const { W, E, N, S } = WORLD;
   const worldW = E - W;
@@ -35,7 +31,6 @@ window.autoFitCamera = function (preserve = false) {
   CAM_PAN_Y = 0;
 };
 
-// Screen <-> World conversions (attach to window!)
 window.screenToWorld = function (sx, sy) {
   const { W, E, N, S } = WORLD;
   const cx = (W + E) / 2;

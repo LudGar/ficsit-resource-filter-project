@@ -1,18 +1,3 @@
-/* ============================
-   growth.js
-   Space Colonization (world-space)
-   - Seeds arranged on circle around WORLD center
-   - Leaves from nodePoints + filteredMarkers meta
-   - Claiming is first-come-first-serve
-   - NEW: Seed type assignment rule:
-       * typed seed -> global target of that type (ignores region)
-       * untyped seed -> region-based (ownerId nearest-seed region)
-============================ */
-
-/* globals WORLD, WORLD_UNITS_PER_METER, SEED_COUNT, SEED_RADIUS_WORLD, SEED_ROTATION_DEG */
-/* globals MIN_DIST_M, MAX_DIST_M, BRANCH_LEN_M, SEED_TYPE_ASSIGNMENTS */
-/* globals nodePoints, filteredMarkers */
-
 window.trees = window.trees || [];
 window.leaves = window.leaves || [];
 window.seedsWorld = window.seedsWorld || [];

@@ -27,6 +27,12 @@ window.originMode = "game";
 // Seed rotation (in degrees, 0 = first seed at "east" on the circle)
 window.SEED_ROTATION_DEG = 0;
 
+// Conveyor belt width (meters)
+window.CONVEYOR_WIDTH_M = 2;
+
+// Per-seed target type (string) or null for "Any"
+window.SEED_TYPE_ASSIGNMENTS = []; // length = SEED_COUNT, values: null or "limestone"/...
+
 // Seeds
 window.SEED_COUNT = 8;
 window.SEED_RADIUS_M = 2000;

@@ -48,6 +48,8 @@ window.parseJsonPayload = function parseJsonPayload(data) {
 };
 
 allNodeMarkers = nodePoints.map(p => ({ ...p }));
+availableTypes = new Set(allMarkers.map(m => m.type));
+availablePurities = new Set(allMarkers.map(m => m.purity));
 
 // Build Voronoi in WORLD space, then draw by mapping to screen
 function buildVoronoiLayerWorld() {
@@ -72,21 +74,17 @@ function buildVoronoiLayerWorld() {
 window.voronoiCells = [];
 
 window.applyFilters = function () {
-  filteredMarkers = allMarkers.filter(
-    m => selectedTypes.has(m.type) && selectedPurities.has(m.purity)
-  );
+  // no filtering anymore
+  filteredMarkers = allMarkers.slice();
 
-  // WORLD coordinates (no projection)
   nodePoints = filteredMarkers.map(m => ({ x: m.x, y: m.y }));
-
-  // Keep a static copy for the overlay layer
-  allNodeMarkers = filteredMarkers.map(m => ({ ...m }));
+  allNodeMarkers = filteredMarkers.map(m => ({ ...m })); // static overlay
 
   const c = document.getElementById("nodesCount");
   if (c) c.textContent = String(nodePoints.length);
 
   rebuildForestFromProjected();
-  window.voronoiCells = buildVoronoiLayerWorld();
+  window.voronoiCells = buildVoronoiLayerWorld?.() || [];
 
-  console.log(`[Data] applyFilters(): ${nodePoints.length} nodes visible`);
+  console.log(`[Data] Using all nodes: ${nodePoints.length}`);
 };

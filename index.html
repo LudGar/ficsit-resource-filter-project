@@ -53,36 +53,24 @@
       <!-- Filters -->
       <div class="group">
         <div class="group-header">
-          <span>Types</span>
+          <span>Seed Targets</span>
           <div class="group-actions">
-            <button id="typesAllBtn" class="mini">All</button>
-            <button id="typesNoneBtn" class="mini">None</button>
+            <button id="seedsAnyBtn" class="mini">All = Any</button>
           </div>
         </div>
-        <div id="typesContainer" class="chip-list"></div>
+        <div id="seedTargetsContainer" class="seed-targets"></div>
       </div>
-    
-      <div class="group">
-        <div class="group-header">
-          <span>Purity</span>
-          <div class="group-actions">
-            <button id="purityAllBtn" class="mini">All</button>
-            <button id="purityNoneBtn" class="mini">None</button>
-          </div>
-        </div>
-        <div id="puritiesContainer" class="chip-list"></div>
-      </div>
-    
-      <div class="counts">Nodes selected: <span id="nodesCount">0</span></div>
+      
+      <div class="counts">Nodes loaded: <span id="nodesCount">0</span></div>      
     
       <!-- Growth parameters in METERS -->
       <div class="group">
         <div class="group-header"><span>Growth (meters)</span></div>
-        <label>Min distance (m)</label>
+        <div><label>Min distance (m)</label></div>
         <input id="minDistM" type="number" min="1" step="1" value="101" />
-        <label>Max distance (m)</label>
+        <div><label>Max distance (m)</label></div>
         <input id="maxDistM" type="number" min="1" step="100" value="2001" />
-        <label>Branch length (m)</label>
+        <div><label>Branch length (m)</label></div>
         <input id="branchLenM" type="number" min="1" step="1" value="56" />
       </div>
     

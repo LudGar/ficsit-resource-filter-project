@@ -113,11 +113,5 @@ The scope is expected to evolve.
 
 ---
 
-## 📄 License
-
-MIT (or to be decided)
-
----
-
 If you’re reading this as future-you:  
 Yes, it grew bigger than planned — and that’s fine.

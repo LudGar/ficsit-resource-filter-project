@@ -1,216 +1,148 @@
-🌿 Space Colonization – World-Scale Growth Visualizer
+# Space Colonization – Resource Network Explorer
 
-A browser-based visualization tool for world-scale growth algorithms, inspired by space colonization, resource networks, and game-map analysis.
+A browser-based visualization tool built with **p5.js** that explores **resource node networks** using a **space colonization growth algorithm**, inspired by procedural tree growth and logistics layouts.
 
-This project uses real game world coordinates (e.g. from Satisfactory) to grow branching networks from configurable seeds toward resource nodes, with strict spatial rules, ownership, and first-come claiming.
+The app loads real in-game resource node data, visualizes it in world space, and grows branching networks from configurable seed points toward those nodes. It is designed as an **experimental, interactive sandbox** for studying spatial distribution, attraction rules, and growth constraints.
 
-✨ What this project is
+---
 
-A p5.js web app (no build step, no framework)
+## ✨ Core Features
 
-A world-space visualization tool, not just a sketch
+### 🌍 World-Space Visualization
+- World-aligned camera with **pan / zoom / fit**
+- Real map background assembled from **4 tiled images**
+- Blueprint-style world grid (zoom-aware, performance-optimized)
+- Toggleable origin logic (game 0,0 vs world center)
 
-A growth simulator, not a static renderer
+### 🌱 Space Colonization Growth
+- Multiple **seed points** arranged on a configurable circle
+- Each seed grows an independent **tree network**
+- Growth uses a classic **space colonization algorithm**:
+  - Nodes act as attraction points
+  - Branches grow toward nearby nodes
+  - Nodes are consumed once reached
+- Growth direction snapped to **45° increments**
+- Growth halts automatically when no nodes remain
 
-A debug / analysis aid for large coordinate maps
+### 🎯 Seed Targeting Logic
+- Seeds can be:
+  - **Untyped** → grow only within their nearest-seed region
+  - **Type-assigned** → grow globally toward nodes of that type
+- First-come-first-serve claiming prevents duplicate growth toward the same node
+- All nodes remain visible even after being consumed
 
-It is designed to:
+### 🧱 Physical Scale Awareness
+- Branch thickness is rendered at **real-world scale**
+  - Matches the in-game conveyor belt width (**2 meters**)
+  - Scales correctly with camera zoom
+- Distances (min / max / branch length) are defined in **meters**
 
-Load thousands of real-world nodes from JSON
+### 🧭 Debug & Inspection Tools
+- Mouse position displayed in **world coordinates**
+- Hover tooltip for nodes (type, purity, exact position)
+- Static overlay of all nodes (type color + purity shape)
+- Seed radius and seed positions rendered in-world
 
-Visualize them on an actual game map
+---
 
-Grow branching structures toward them under clear rules
+## 🧩 Project Structure
 
-Let you experiment with spatial strategies and constraints
+/index.html
+/styles.css
 
-🧠 Core Concepts
-Space Colonization (Growth Algorithm)
+/js
+├─ sketch.js # Rendering, camera, input, map, overlays
+├─ growth.js # Space colonization algorithm & tree logic
+├─ data.js # JSON parsing, node preparation
+├─ ui.js # UI construction & interaction
+└─ config.js # Global constants & configuration
 
-Branches grow toward nearby “leaves” (nodes):
+/img
+├─ Map_0-0.png
+├─ Map_0-1.png
+├─ Map_1-0.png
+└─ Map_1-1.png
 
-Leaves attract nearby branch tips
+/nodes.json # Resource node dataset
 
-Branches grow in discrete steps
 
-Leaves are removed once reached
+All JavaScript runs in **p5.js global mode** (no ES modules) to keep loading order simple and debuggable.
 
-Growth stops when no leaves remain
+---
 
-Seeds (Tree Roots)
+## 📦 Data Format
 
-Multiple seeds are placed in a circle around the world
+The app expects a `nodes.json` file structured similarly to:
 
-Each seed creates its own independent tree
+- Resource nodes grouped by type and purity
+- Each node providing at least:
+  - `x`, `y` (world coordinates)
+  - `type` (e.g. limestone, iron, copper)
+  - `purity` (impure / normal / pure)
 
-Seeds can optionally be assigned a resource type
+This project was designed around real in-game data but can be adapted to other spatial datasets.
 
-Assigned → global targeting of that type
+---
 
-Unassigned → region-based targeting (nearest-seed region)
+## 🕹️ Controls
 
-First-Come-First-Serve Claiming
+- **Mouse drag** – Pan camera
+- **Mouse wheel** – Zoom
+- **Double click** – Fit world to view
+- **Hover node** – Show tooltip
+- **UI panel** – Configure seeds, distances, growth behavior
 
-Once a tree gets close enough to a node, it claims it
+---
 
-Other trees ignore claimed nodes
+## 🚧 Current Scope & Intent
 
-Prevents redundant or overlapping growth
+This project is **not**:
+- A finished game
+- A production logistics planner
+- A finalized simulation
 
-🗺️ World Space & Camera
+It **is**:
+- A research & visualization sandbox
+- A foundation for experimenting with spatial growth rules
+- A base for future expansion into analysis, export, or gameplay systems
 
-All coordinates are world coordinates, not canvas coordinates
+---
 
-Supports:
+## 🧠 Inspiration
 
-Pan (drag)
+- Space Colonization Algorithm (Runions et al.)
+- Procedural tree and vein growth
+- Logistics games and world-scale resource planning
+- Blueprint-style technical visualization
 
-Zoom (mouse wheel, zoom-to-cursor)
+---
 
-Fit world to window (double-click)
+## 🛠️ Tech Stack
 
-Grid, map, nodes, seeds, and branches are all world-locked
+- **p5.js** (rendering, input, math)
+- Vanilla JavaScript (no build step)
+- HTML / CSS (custom UI styling)
 
-🧱 Visualization Layers
+---
 
-Rendered bottom → top:
+## 📈 Roadmap (Open-Ended)
 
-Game Map Layer
+This repository is intentionally flexible. Possible future directions include:
+- Exporting networks (SVG / GeoJSON)
+- Cost / flow simulation along branches
+- Constraint-based routing (terrain, obstacles)
+- Time-based or staged growth
+- Integration with other game or map datasets
 
-4 tiled images aligned to world bounds
+The scope is expected to evolve.
 
-Blueprint Grid
+---
 
-Dot + major line grid in world space
+## 📄 License
 
-Seed Layer
+MIT (or to be decided)
 
-Seed positions
+---
 
-Seed radius circle
-
-Voronoi Overlay (optional)
-
-Region partitioning
-
-Growth (Branches)
-
-Branch width = real conveyor belt width (2m)
-
-Color fades with distance
-
-Node Overlay
-
-All nodes always visible
-
-Shape by purity:
-
-Impure → Circle
-
-Normal → Triangle
-
-Pure → Hexagon
-
-HUD & Tooltips
-
-Mouse world coordinates
-
-Node hover tooltip (type, purity, position)
-
-🎛️ UI Features
-
-Movable, Windows-11-style glass panel
-
-Controls for:
-
-Seed count
-
-Seed radius (meters)
-
-Seed rotation (degrees)
-
-Per-seed resource type assignment
-
-Start / Reset growth
-
-Live inspection without restarting the app
-
-📁 Project Structure
-/
-├─ index.html          # App shell
-├─ styles.css          # UI + visual styling
-├─ nodes.json          # World node data (external)
-├─ img/
-│  ├─ Map_0-0.png
-│  ├─ Map_0-1.png
-│  ├─ Map_1-0.png
-│  └─ Map_1-1.png
-└─ js/
-   ├─ config.js        # Global constants & settings
-   ├─ data.js          # JSON parsing & node handling
-   ├─ growth.js        # Space colonization algorithm
-   ├─ ui.js            # UI creation & bindings
-   └─ sketch.js        # Rendering, camera, interaction
-
-
-No bundler, no transpiler, no server required.
-
-🚀 Running the Project
-
-Because the app loads JSON and images, you must use a local server.
-
-Examples:
-
-# Python
-python -m http.server 8080
-
-# Node
-npx serve .
-
-# VS Code
-Live Server extension
-
-
-Then open:
-
-http://localhost:8080
-
-🎯 Intended Use Cases
-
-Analyze resource layouts on large game maps
-
-Prototype logistics / network growth strategies
-
-Explore spatial partitioning problems
-
-Visualize ownership, reach, and distance
-
-Experiment with procedural growth constraints
-
-This is not a finished game mechanic — it’s a tool for thinking spatially.
-
-🔧 Current Limitations
-
-No persistence (reload resets state)
-
-No export yet (SVG / JSON planned)
-
-Growth is CPU-bound for very large node counts
-
-One growth model (space colonization) for now
-
-🧭 Roadmap (High-Level)
-
-This is intentionally open-ended, but likely directions include:
-
-Export growth paths (SVG / GeoJSON)
-
-Alternative growth models
-
-Hard trunk vs flexible branch modes
-
-Cost / distance weighting
-
-Simulation replay & step controls
-
-Layer toggles & legends
+If you’re reading this as future-you:  
+Yes, it grew bigger than planned — and that’s fine.

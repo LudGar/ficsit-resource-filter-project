@@ -1,4 +1,4 @@
-window.buildFilterUI=function(){
+window.buildFilterUI      = function () {
   const typesContainer=document.getElementById("typesContainer");
   const puritiesContainer=document.getElementById("puritiesContainer");
   if(!typesContainer||!puritiesContainer)return;
@@ -33,8 +33,66 @@ window.buildFilterUI=function(){
   console.log("[UI] Filter UI built");
 };
 
+window.buildSeedTargetsUI = function () {
+  const host = document.getElementById("seedTargetsContainer");
+  if (!host) return;
+
+  host.innerHTML = "";
+
+  // Ensure assignments size
+  if (!Array.isArray(SEED_TYPE_ASSIGNMENTS)) SEED_TYPE_ASSIGNMENTS = [];
+  while (SEED_TYPE_ASSIGNMENTS.length < SEED_COUNT) SEED_TYPE_ASSIGNMENTS.push(null);
+  if (SEED_TYPE_ASSIGNMENTS.length > SEED_COUNT) SEED_TYPE_ASSIGNMENTS.length = SEED_COUNT;
+
+  const types = Array.from(availableTypes || []).sort();
+
+  for (let i = 0; i < SEED_COUNT; i++) {
+    const row = document.createElement("div");
+    row.className = "seed-row";
+
+    // color dot matches your per-tree hue
+    const dot = document.createElement("div");
+    dot.className = "seed-dot";
+    dot.style.background = `hsl(${(i * 360) / Math.max(1, SEED_COUNT)}, 90%, 65%)`;
+
+    const label = document.createElement("div");
+    label.textContent = `Seed ${i}`;
+
+    const sel = document.createElement("select");
+    const optAny = document.createElement("option");
+    optAny.value = "";
+    optAny.textContent = "Any";
+    sel.appendChild(optAny);
+
+    for (const t of types) {
+      const o = document.createElement("option");
+      o.value = t;
+      o.textContent = t;
+      sel.appendChild(o);
+    }
+
+    sel.value = SEED_TYPE_ASSIGNMENTS[i] || "";
+    sel.onchange = () => {
+      SEED_TYPE_ASSIGNMENTS[i] = sel.value ? sel.value : null;
+      if (!simulationRunning) rebuildForestFromProjected();
+    };
+
+    row.appendChild(dot);
+    row.appendChild(label);
+    row.appendChild(sel);
+    host.appendChild(row);
+  }
+};
+
 window.bindUI = function () {
   const $ = id => document.getElementById(id);
+
+  const seedsAnyBtn = document.getElementById("seedsAnyBtn");
+  if (seedsAnyBtn) seedsAnyBtn.onclick = () => {
+    SEED_TYPE_ASSIGNMENTS = Array.from({ length: SEED_COUNT }, () => null);
+    buildSeedTargetsUI();
+    if (!simulationRunning) rebuildForestFromProjected();
+  };
 
   // Helper: parse numbers safely
   const num = v => {
@@ -114,6 +172,7 @@ window.bindUI = function () {
   if (startBtn) startBtn.onclick = () => {
     if (leaves.length === 0 || trees.length === 0) {
       if (typeof applyFilters === 'function') applyFilters();
+      if (typeof buildSeedTargetsUI === "function") buildSeedTargetsUI();
     }
     if (leaves.length === 0 || trees.length === 0) {
       console.warn('[Start] No leaves/trees — check filters');
@@ -154,6 +213,5 @@ window.bindUI = function () {
       ui.style.top  = (e.clientY - offset.y) + 'px';
     });
   }
-
   console.log('[UI] Bound successfully');
 };
